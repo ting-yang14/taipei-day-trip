@@ -1,11 +1,10 @@
 from itertools import chain
-import mysql.connector
 from mysql.connector import Error, pooling
 
 dbconfig = {
     "host": "localhost",
     "user":"root",
-    "password": "test1234",
+    "password": "TaipeiNO1",
     "database": "taipei_day_trip"
 }
 connection_pool = pooling.MySQLConnectionPool(

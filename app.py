@@ -28,7 +28,6 @@ def api_attractions():
 		return jsonify(result), 200
 	return jsonify(result), 500
 	
-
 @app.route("/api/attraction/<int:attractionId>", methods = ["GET"])
 def api_attraction(attractionId):
 	result = get_attraction(attractionId)
@@ -45,4 +44,5 @@ def api_categories():
 		return jsonify(result), 200
 	return jsonify(result), 500
 
-app.run(port = 3000)
+if __name__ == '__main__':
+	app.run(port = 3000)

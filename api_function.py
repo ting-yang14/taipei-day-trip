@@ -1,13 +1,12 @@
 from itertools import chain
-
 import mysql.connector
 from mysql.connector import Error, pooling
 
 dbconfig = {
     "host": "localhost",
     "user":"root",
-    "password" : "test1234",
-    "database" : "taipei_day_trip"
+    "password": "test1234",
+    "database": "taipei_day_trip"
 }
 connection_pool = pooling.MySQLConnectionPool(
     pool_name = "test",
@@ -21,34 +20,39 @@ def get_attractions(page, keyword = None):
     try:
         connection = connection_pool.get_connection()
         cursor = connection.cursor()
-        page=int(page)
-        keyword_list=get_categories()["data"]
-        print(keyword)
+        page = int(page)
+        keyword_list = get_categories()["data"]
         if keyword == None:
             get_attraction_id_query = "SELECT id FROM attraction"
             cursor.execute(get_attraction_id_query)
         elif keyword in keyword_list:
             get_attraction_by_category_query = "SELECT id FROM attraction WHERE category = %s"
-            val=(keyword,)
+            val = (keyword,)
             cursor.execute(get_attraction_by_category_query, val)
         else:
-            get_attraction_by_name_query = "SELECT id FROM attraction WHERE name LIKE %s'"
-            val=('%'+keyword+'%',)
+            get_attraction_by_name_query = "SELECT id FROM attraction WHERE name LIKE %s"
+            val = ('%' + keyword + '%',)
             cursor.execute(get_attraction_by_name_query, val)
-        result_id=cursor.fetchall()
-        id_list = list(chain.from_iterable(result_id))
-        data_list=[]
-        if (page+1)*12<=len(id_list):
-            nextPage=page+1
-            for i in range(page*12, (page+1)*12):
-                attraction = get_attraction(id_list[i])
-                data_list.append(attraction["data"])
+        result_id = cursor.fetchall()
+        if not result_id:
+            result = {"error":True, "message":"keyword not found"}
         else:
-            nextPage=None
-            for i in range(page*12, len(id_list)):
-                data_list.append(get_attraction(id_list[i])["data"])
-        result={"nextPage":nextPage, "data":data_list}
-    except mysql.connector.Error as error:
+            id_list = list(chain.from_iterable(result_id))
+            data_list = []
+            if (page+1) * 12 < len(id_list):
+                nextPage = page + 1
+                for i in range(page * 12, (page + 1) * 12):
+                    attraction = get_attraction(id_list[i])
+                    data_list.append(attraction["data"])
+                result = {"nextPage":nextPage, "data":data_list}
+            if (page+1) * 12 - len(id_list) < 12:
+                nextPage = None
+                for i in range(page * 12, len(id_list)):
+                    data_list.append(get_attraction(id_list[i])["data"])
+                result = {"nextPage":nextPage, "data":data_list}
+            else:
+                result = {"error":True, "message":"page out of range"}
+    except Error as error:
         result = {"error":True, "message":error}
     finally:
         if connection.is_connected():
@@ -60,7 +64,7 @@ def get_attraction(attractionId):
     try:
         connection = connection_pool.get_connection()
         cursor = connection.cursor()
-        get_attraction_query = "SELECT * FROM attraction WHERE id = %s;"
+        get_attraction_query = "SELECT * FROM attraction WHERE id = %s"
         val = (attractionId,)
         cursor.execute(get_attraction_query, val)
         attraction = cursor.fetchone()
@@ -83,7 +87,7 @@ def get_attraction(attractionId):
                         "images":img_result
                         }
                  }
-    except mysql.connector.Error as error:
+    except Error as error:
         result = {"error":True, "message":error}
     finally:
         if connection.is_connected():
@@ -98,10 +102,10 @@ def get_categories():
         get_category_query = "SELECT category FROM attraction;"
         cursor.execute(get_category_query)
         category = cursor.fetchall()
-        category_result=list(set(list(chain.from_iterable(category))))
-        result = {"data":category_result}
-    except mysql.connector.Error as error:
-        result = {"error":True, "message":error}
+        category_result = list(set(list(chain.from_iterable(category))))
+        result = {"data": category_result}
+    except Error as error:
+        result = {"error": True, "message": error}
     finally:
         if connection.is_connected():
             cursor.close()

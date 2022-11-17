@@ -1,8 +1,8 @@
 from flask import *
 from api_function import get_categories, get_attraction, get_attractions
-app=Flask(__name__)
-app.config["JSON_AS_ASCII"]=False
-app.config["TEMPLATES_AUTO_RELOAD"]=True
+app = Flask(__name__)
+app.config["JSON_AS_ASCII"] = False
+app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 # Pages
 @app.route("/")
@@ -19,7 +19,7 @@ def thankyou():
 	return render_template("thankyou.html")
 
 # api
-@app.route("/api/attractions", methods=["GET"])
+@app.route("/api/attractions", methods = ["GET"])
 def api_attractions():
 	page = request.args.get('page')
 	keyword = request.args.get('keyword')
@@ -29,7 +29,7 @@ def api_attractions():
 	return jsonify(result), 500
 	
 
-@app.route("/api/attraction/<int:attractionId>", methods=["GET"])
+@app.route("/api/attraction/<int:attractionId>", methods = ["GET"])
 def api_attraction(attractionId):
 	result = get_attraction(attractionId)
 	if "data" in result:
@@ -38,11 +38,11 @@ def api_attraction(attractionId):
 		return jsonify(result), 400
 	return jsonify(result), 500
 		
-@app.route("/api/categories", methods=["GET"])
+@app.route("/api/categories", methods = ["GET"])
 def api_categories():
 	result = get_categories()
 	if "data" in result:
 		return jsonify(result), 200
 	return jsonify(result), 500
 
-app.run(port=3000, debug=True)
+app.run(port = 3000)

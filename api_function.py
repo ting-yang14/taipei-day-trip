@@ -44,7 +44,7 @@ def get_attractions(page, keyword = None):
                     attraction = get_attraction(id_list[i])
                     data_list.append(attraction["data"])
                 result = {"nextPage":nextPage, "data":data_list}
-            if (page+1) * 12 - len(id_list) < 12:
+            elif (page+1) * 12 - len(id_list) < 12:
                 nextPage = None
                 for i in range(page * 12, len(id_list)):
                     data_list.append(get_attraction(id_list[i])["data"])

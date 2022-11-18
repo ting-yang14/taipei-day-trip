@@ -14,7 +14,19 @@ connection_pool = pooling.MySQLConnectionPool(
     autocommit = True,
     **dbconfig
 )
-
+def generate_attraction_data(attraction_data_list):
+    return {
+        "id": attraction_data_list[0], 
+        "name": attraction_data_list[1], 
+        "category": attraction_data_list[2], 
+        "description": attraction_data_list[3],
+        "address": attraction_data_list[4],
+        "transport": attraction_data_list[5],
+        "mrt": attraction_data_list[6],
+        "lat": attraction_data_list[7],
+        "lng": attraction_data_list[8],
+        "images": attraction_data_list[9].split(",")
+    }
 def get_attractions(page, keyword = None):
     try:
         connection = connection_pool.get_connection()
@@ -22,37 +34,57 @@ def get_attractions(page, keyword = None):
         page = int(page)
         keyword_list = get_categories()["data"]
         if keyword == None:
-            get_attraction_id_query = "SELECT id FROM attraction"
-            cursor.execute(get_attraction_id_query)
+            get_attractions_query = """
+                SELECT attraction.id, attraction.name, attraction.category, attraction.description, attraction.address,
+                attraction.transport, attraction.mrt, attraction.lat, attraction.lng,
+                GROUP_CONCAT(img.url SEPARATOR ',')
+                FROM attraction INNER JOIN img on img.attraction_id=attraction.id
+                GROUP BY attraction.id
+            """
+            cursor.execute(get_attractions_query)
         elif keyword in keyword_list:
-            get_attraction_by_category_query = "SELECT id FROM attraction WHERE category = %s"
+            get_attraction_by_category_query = """
+                SELECT attraction.id, attraction.name, attraction.category, attraction.description, attraction.address,
+                attraction.transport, attraction.mrt, attraction.lat, attraction.lng,
+                GROUP_CONCAT(img.url SEPARATOR ',')
+                FROM attraction INNER JOIN img on img.attraction_id=attraction.id
+                WHERE category = %s
+                GROUP BY attraction.id
+            """
             val = (keyword,)
             cursor.execute(get_attraction_by_category_query, val)
         else:
-            get_attraction_by_name_query = "SELECT id FROM attraction WHERE name LIKE %s"
+            get_attraction_by_name_query = """
+                SELECT attraction.id, attraction.name, attraction.category, attraction.description, attraction.address,
+                attraction.transport, attraction.mrt, attraction.lat, attraction.lng,
+                GROUP_CONCAT(img.url SEPARATOR ',')
+                FROM attraction INNER JOIN img on img.attraction_id=attraction.id
+                WHERE name LIKE %s
+                GROUP BY attraction.id
+            """
             val = ('%' + keyword + '%',)
             cursor.execute(get_attraction_by_name_query, val)
-        result_id = cursor.fetchall()
-        if not result_id:
-            result = {"error":True, "message":"keyword not found"}
+        result_list = cursor.fetchall()
+        if not result_list:
+            result = {"error": True, "message": "keyword not found"}
         else:
-            id_list = list(chain.from_iterable(result_id))
             data_list = []
-            if (page+1) * 12 < len(id_list):
+            if (page+1) * 12 < len(result_list):
                 nextPage = page + 1
                 for i in range(page * 12, (page + 1) * 12):
-                    attraction = get_attraction(id_list[i])
-                    data_list.append(attraction["data"])
-                result = {"nextPage":nextPage, "data":data_list}
-            elif (page+1) * 12 - len(id_list) < 12:
+                    attraction = generate_attraction_data(result_list[i])
+                    data_list.append(attraction)
+                result = {"nextPage": nextPage, "data": data_list}
+            elif (page+1) * 12 - len(result_list) < 12:
                 nextPage = None
-                for i in range(page * 12, len(id_list)):
-                    data_list.append(get_attraction(id_list[i])["data"])
-                result = {"nextPage":nextPage, "data":data_list}
+                for i in range(page * 12, len(result_list)):
+                    attraction = generate_attraction_data(result_list[i])
+                    data_list.append(attraction)
+                result = {"nextPage": nextPage, "data": data_list}
             else:
-                result = {"error":True, "message":"page out of range"}
+                result = {"error": True, "message": "page out of range"}
     except Error as error:
-        result = {"error":True, "message":error}
+        result = {"error": True, "message": error}
     finally:
         if connection.is_connected():
             cursor.close()
@@ -63,31 +95,23 @@ def get_attraction(attractionId):
     try:
         connection = connection_pool.get_connection()
         cursor = connection.cursor()
-        get_attraction_query = "SELECT * FROM attraction WHERE id = %s"
+        get_attraction_query = """
+            SELECT attraction.id, attraction.name, attraction.category, attraction.description, attraction.address,
+            attraction.transport, attraction.mrt, attraction.lat, attraction.lng,
+            GROUP_CONCAT(img.url SEPARATOR ',')
+            FROM attraction INNER JOIN img on img.attraction_id=attraction.id
+            WHERE attraction.id = %s
+            GROUP BY attraction.id
+        """
         val = (attractionId,)
         cursor.execute(get_attraction_query, val)
-        attraction = cursor.fetchone()
-        if not attraction:
-            result = {"error":True, "message":"attractionID not found"}
-        get_img_query = "SELECT url FROM img WHERE attraction_id = %s"
-        cursor.execute(get_img_query, val)
-        imgs = cursor.fetchall()
-        img_result = list(chain.from_iterable(imgs))
-        result = {"data":{
-                        "id":attraction[0], 
-                        "name":attraction[1], 
-                        "category":attraction[2], 
-                        "description":attraction[3],
-                        "address":attraction[4],
-                        "transport":attraction[5],
-                        "mrt":attraction[6],
-                        "lat":attraction[7],
-                        "lng":attraction[8],
-                        "images":img_result
-                        }
-                 }
+        result_list = cursor.fetchone()
+        if not result_list:
+            result = {"error": True, "message": "attractionID not found"}
+        data = generate_attraction_data(result_list)
+        result = {"data": data}
     except Error as error:
-        result = {"error":True, "message":error}
+        result = {"error": True, "message": error}
     finally:
         if connection.is_connected():
             cursor.close()

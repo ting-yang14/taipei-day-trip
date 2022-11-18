@@ -40,8 +40,10 @@ def get_attractions(page, keyword = None):
                 GROUP_CONCAT(img.url SEPARATOR ',')
                 FROM attraction INNER JOIN img on img.attraction_id=attraction.id
                 GROUP BY attraction.id
+                LIMIT %s, 13
             """
-            cursor.execute(get_attractions_query)
+            val = (page * 12,)
+            cursor.execute(get_attractions_query, val)
         elif keyword in keyword_list:
             get_attraction_by_category_query = """
                 SELECT attraction.id, attraction.name, attraction.category, attraction.description, attraction.address,
@@ -50,8 +52,9 @@ def get_attractions(page, keyword = None):
                 FROM attraction INNER JOIN img on img.attraction_id=attraction.id
                 WHERE category = %s
                 GROUP BY attraction.id
+                LIMIT %s, 13
             """
-            val = (keyword,)
+            val = (keyword, page * 12,)
             cursor.execute(get_attraction_by_category_query, val)
         else:
             get_attraction_by_name_query = """
@@ -61,28 +64,24 @@ def get_attractions(page, keyword = None):
                 FROM attraction INNER JOIN img on img.attraction_id=attraction.id
                 WHERE name LIKE %s
                 GROUP BY attraction.id
+                LIMIT %s, 13
             """
-            val = ('%' + keyword + '%',)
+            val = ('%' + keyword + '%', page * 12,)
             cursor.execute(get_attraction_by_name_query, val)
         result_list = cursor.fetchall()
-        if not result_list:
-            result = {"error": True, "message": "keyword not found"}
+        data_list = []
+        if len(result_list) == 13:
+            nextPage = page + 1
+            for i in range(0, 13):
+                attraction = generate_attraction_data(result_list[i])
+                data_list.append(attraction)
+            result = {"nextPage": nextPage, "data": data_list}
         else:
-            data_list = []
-            if (page+1) * 12 < len(result_list):
-                nextPage = page + 1
-                for i in range(page * 12, (page + 1) * 12):
-                    attraction = generate_attraction_data(result_list[i])
-                    data_list.append(attraction)
-                result = {"nextPage": nextPage, "data": data_list}
-            elif (page+1) * 12 - len(result_list) < 12:
-                nextPage = None
-                for i in range(page * 12, len(result_list)):
-                    attraction = generate_attraction_data(result_list[i])
-                    data_list.append(attraction)
-                result = {"nextPage": nextPage, "data": data_list}
-            else:
-                result = {"error": True, "message": "page out of range"}
+            nextPage = None
+            for i in range(0, len(result_list)):
+                attraction = generate_attraction_data(result_list[i])
+                data_list.append(attraction)
+            result = {"nextPage": nextPage, "data": data_list}
     except Error as error:
         result = {"error": True, "message": error}
     finally:

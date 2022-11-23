@@ -19,11 +19,13 @@
   </head>
   <body>
     <nav>
-      <div class="nav-container">
-        <h2>台北一日遊</h2>
-        <div class="nav-btn-container">
-          <button class="nav-btn">預定行程</button>
-          <button class="nav-btn">登入/註冊</button>
+      <div class="nav">
+        <div class="nav-container">
+          <h2>台北一日遊</h2>
+          <div class="nav-btn-container">
+            <button class="nav-btn">預定行程</button>
+            <button class="nav-btn">登入/註冊</button>
+          </div>
         </div>
       </div>
     </nav>
@@ -34,8 +36,12 @@
           <h1>輕鬆享受台北一日悠閒</h1>
           <p class="bold">探索每個角落，體驗城市的深度旅遊行程</p>
           <div class="search-bar">
-            <input type="text" id="search" placeholder="輸入景點名稱查詢" />
-            <button class="search-btn">
+            <input
+              type="text"
+              id="search-input"
+              placeholder="輸入景點名稱查詢"
+            />
+            <button type="submit" class="search-btn" id="search-btn">
               <img src={{ url_for('static', filename='/img/icon_search.png') }}
               />
             </button>

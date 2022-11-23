@@ -96,7 +96,16 @@ footer > p {
   justify-content: center;
   padding: 10px 0;
 }
+.nav {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  background-color: var(--additional-color-white);
+  overflow: hidden;
+  z-index: 1;
+}
 .welcome {
+  margin-top: 54px;
   background-image: url("/static/img/welcome.png");
   background-position: left top;
   height: 320px;

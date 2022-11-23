@@ -1,12 +1,26 @@
 let nextPage = 0;
-
+let keyword = "";
+let dataList = [];
 const main = document.querySelector("main");
-basicURL = "http://192.168.1.143:3000/api/attractions?page=0";
-generateAttractionDiv(basicURL);
-const categoryList = document.querySelector(".category-list");
-categoryURL = "http://192.168.1.143:3000/api/categories";
-generateCategoryBtn(categoryURL);
 
+const attractionsApi = "/api/attractions?page=";
+
+const categoryList = document.querySelector(".category-list");
+const categoriesApi = "api/categories";
+
+generateCategoryBtn(categoriesApi);
+const observer = new IntersectionObserver(function (entries) {
+  console.log(entries);
+  if (entries[0].isIntersecting && nextPage != null) {
+    generateAttractionDiv(
+      attractionsApi + nextPage.toString() + "&keyword=" + keyword
+    );
+  } else {
+    return;
+  }
+});
+observer.observe(document.querySelector("footer"));
+// generateAttractionDiv(attractionsApi + "0");
 function createAttraction(imgURL, name, mrt, category) {
   const newDiv = document.createElement("div");
   newDiv.classList.add("attraction", "border");
@@ -90,20 +104,50 @@ function generateCategoryBtn(URL) {
       console.log(error);
     });
 }
+document
+  .getElementById("search-btn")
+  .addEventListener("click", filterAttractions);
+function filterAttractions() {
+  keyword = document.getElementById("search-input").value;
+  fetch(attractionsApi + "0&keyword=" + keyword)
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(data.data);
+      if (data.data.length === 0) {
+        alert("查無此景點！！");
+      } else {
+        nextPage = 0;
+        console.log(nextPage);
 
-// function loadMore() {
-//   // 利用 fetch 進行連線並取得資料
-//   promise.then(function (attractionList) {
-//     // 每次新增 8 個 titleItem
-//     for (let i = itemNum; i < itemNum + 8; i++) {
-//       let newDiv = createItem(
-//         str.concat(attractionList[i].file.split(str)[1]),
-//         attractionList[i].stitle
-//       );
-//       newDiv.className = "title";
-//       titleList.appendChild(newDiv);
-//       // console.log(i); // 檢查目前的 item 編號
-//     }
-//     return (itemNum += 8);
-//   });
-// }
+        while (main.firstChild) {
+          main.removeChild(main.firstChild);
+        }
+        nextPage = data.nextPage;
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+}
+function getData(URL) {
+  fetch(URL)
+    .then((response) => response.json())
+    .then((data) => {
+      nextPage = data.nextPage;
+      dataList = data.data;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+}
+function generateAttractions(attractionList) {
+  for (let i = 0; i < 12; i++) {
+    let attractionDiv = createAttraction(
+      attractionList[i].images[0],
+      attractionList[i].name,
+      attractionList[i].mrt,
+      attractionList[i].category
+    );
+    main.appendChild(attractionDiv);
+  }
+}

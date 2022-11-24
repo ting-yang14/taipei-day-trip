@@ -1,27 +1,108 @@
 let nextPage = 0;
 let keyword = "";
-let dataList = [];
+
+const attractionsApi = `/api/attractions?page=`;
+const categoriesApi = `/api/categories`;
 const main = document.querySelector("main");
-
-const attractionsApi = "/api/attractions?page=";
-
+const footer = document.querySelector("footer");
 const categoryList = document.querySelector(".category-list");
-const categoriesApi = "api/categories";
-
-generateCategoryBtn(categoriesApi);
+const searchInput = document.getElementById("search-input");
+const searchBtn = document.getElementById("search-btn");
 const observer = new IntersectionObserver(function (entries) {
-  console.log(entries);
   if (entries[0].isIntersecting && nextPage != null) {
     generateAttractionDiv(
-      attractionsApi + nextPage.toString() + "&keyword=" + keyword
+      `${attractionsApi}${nextPage.toString()}&keyword=${keyword}`
     );
   } else {
     return;
   }
 });
-observer.observe(document.querySelector("footer"));
-// generateAttractionDiv(attractionsApi + "0");
-function createAttraction(imgURL, name, mrt, category) {
+
+document.addEventListener("click", (e) => {
+  if (
+    categoryList.style.display == "block" &&
+    !categoryList.contains(e.target) &&
+    !searchInput.contains(e.target)
+  ) {
+    categoryList.style.display = "none";
+  }
+});
+searchInput.addEventListener("click", showCategoryList);
+searchBtn.addEventListener("click", filterAttractions);
+
+generateBasicAttractions();
+createCategoryBtn(categoriesApi);
+
+function showCategoryList() {
+  let catBtn = Array.from(document.querySelectorAll(".cat-btn"));
+  catBtn.forEach((button) => button.addEventListener("click", setCategory));
+  categoryList.style.display = "block";
+}
+
+function setCategory(event) {
+  let category = event.target.textContent;
+  searchInput.value = category;
+  categoryList.style.display = "none";
+}
+function generateBasicAttractions() {
+  fetch(`${attractionsApi}${nextPage.toString()}&keyword=${keyword}`)
+    .then((response) => response.json())
+    .then((data) => {
+      nextPage = data.nextPage;
+      loadAttractions(data.data);
+      observer.observe(footer);
+    });
+}
+
+function filterAttractions() {
+  keyword = searchInput.value;
+  nextPage = 0;
+  observer.unobserve(footer);
+  fetch(`${attractionsApi}${nextPage.toString()}&keyword=${keyword}`)
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(data.data);
+      if (data.data.length === 0) {
+        alert("查無此景點！！");
+      } else {
+        while (main.firstChild) {
+          main.removeChild(main.firstChild);
+        }
+        loadAttractions(data.data);
+        nextPage = data.nextPage;
+        observer.observe(footer);
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+}
+
+function generateAttractionDiv(URL) {
+  fetch(URL)
+    .then((response) => response.json())
+    .then((data) => {
+      nextPage = data.nextPage;
+      loadAttractions(data.data);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+}
+
+function loadAttractions(attractionList) {
+  for (let i = 0; i < 12; i++) {
+    let attractionDiv = createAttractionElement(
+      attractionList[i].images[0],
+      attractionList[i].name,
+      attractionList[i].mrt,
+      attractionList[i].category
+    );
+    main.appendChild(attractionDiv);
+  }
+}
+
+function createAttractionElement(imgURL, name, mrt, category) {
   const newDiv = document.createElement("div");
   newDiv.classList.add("attraction", "border");
   const attractionImg = document.createElement("img");
@@ -48,45 +129,10 @@ function createAttraction(imgURL, name, mrt, category) {
   newDiv.appendChild(attractionImg);
   newDiv.appendChild(nameDiv);
   newDiv.appendChild(infoDiv);
-  /* 
-  <div class="attraction border">
-    <img src=imgURL />
-    <div class="attraction-name">
-      <p class="bold">name</p>
-    </div>
-    <div class="attraction-info">
-      <p class="reg">mrt</p>
-      <p class="reg">category</p>
-    </div>
-  </div> 
-  */
   return newDiv;
 }
 
-function generateAttractionDiv(URL) {
-  fetch(URL)
-    .then((response) => response.json())
-    .then((data) => {
-      nextPage = data.nextPage;
-      return data.data;
-    })
-    .then((attractions) => {
-      for (let i = 0; i < 12; i++) {
-        let attractionDiv = createAttraction(
-          attractions[i].images[0],
-          attractions[i].name,
-          attractions[i].mrt,
-          attractions[i].category
-        );
-        main.appendChild(attractionDiv);
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-}
-
-function generateCategoryBtn(URL) {
+function createCategoryBtn(URL) {
   fetch(URL)
     .then((response) => response.json())
     .then((data) => data.data)
@@ -97,57 +143,9 @@ function generateCategoryBtn(URL) {
         let categoryName = document.createTextNode(categories[i]);
         categoryBtn.appendChild(categoryName);
         categoryList.appendChild(categoryBtn);
-        // <button class="cat-btn">category</button>
       }
     })
     .catch((error) => {
       console.log(error);
     });
-}
-document
-  .getElementById("search-btn")
-  .addEventListener("click", filterAttractions);
-function filterAttractions() {
-  keyword = document.getElementById("search-input").value;
-  fetch(attractionsApi + "0&keyword=" + keyword)
-    .then((response) => response.json())
-    .then((data) => {
-      console.log(data.data);
-      if (data.data.length === 0) {
-        alert("查無此景點！！");
-      } else {
-        nextPage = 0;
-        console.log(nextPage);
-
-        while (main.firstChild) {
-          main.removeChild(main.firstChild);
-        }
-        nextPage = data.nextPage;
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-}
-function getData(URL) {
-  fetch(URL)
-    .then((response) => response.json())
-    .then((data) => {
-      nextPage = data.nextPage;
-      dataList = data.data;
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-}
-function generateAttractions(attractionList) {
-  for (let i = 0; i < 12; i++) {
-    let attractionDiv = createAttraction(
-      attractionList[i].images[0],
-      attractionList[i].name,
-      attractionList[i].mrt,
-      attractionList[i].category
-    );
-    main.appendChild(attractionDiv);
-  }
 }

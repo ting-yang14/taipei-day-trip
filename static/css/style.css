@@ -38,7 +38,6 @@ h2 {
   font-size: 30px;
   line-height: 34px;
 }
-
 p.bold {
   font-weight: var(--font-weight-bold);
   font-size: 16px;
@@ -49,19 +48,22 @@ p.reg {
   font-size: 16px;
   line-height: 13.3px;
 }
-
-footer {
-  background-color: var(--secondary-color-gray-50);
+.nav {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  background-color: var(--additional-color-white);
+  overflow: hidden;
+  z-index: 1;
+}
+.nav-container {
+  width: 1200px;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 104px;
+  padding: 10px 0;
 }
-footer > p {
-  flex: none;
-  color: var(--additional-color-white);
-}
-
 .nav-container h2 {
   flex: none;
   color: var(--primary-color-cyan-70);
@@ -87,22 +89,6 @@ footer > p {
   font-weight: var(--font-weight-medium);
   font-size: 16px;
   line-height: 13.3px;
-}
-.nav-container {
-  width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 0;
-}
-.nav {
-  width: 100%;
-  position: fixed;
-  top: 0;
-  background-color: var(--additional-color-white);
-  overflow: hidden;
-  z-index: 1;
 }
 .welcome {
   margin-top: 54px;
@@ -161,7 +147,6 @@ footer > p {
   width: 400px;
   flex-wrap: wrap;
   background-color: var(--additional-color-white);
-  /* display: block; */
   display: none;
   position: absolute;
   top: 51px;
@@ -240,6 +225,17 @@ main {
   border-color: var(--secondary-color-gray-20);
   border-width: 1px;
 }
+footer {
+  background-color: var(--secondary-color-gray-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 104px;
+}
+footer > p {
+  flex: none;
+  color: var(--additional-color-white);
+}
 @media (max-width: 1200px) {
   .nav-container {
     width: 100%;
@@ -256,6 +252,9 @@ main {
 @media (max-width: 600px) {
   main {
     grid-template-columns: repeat(2, 1fr);
+  }
+  .search-bar {
+    max-width: 90%;
   }
 }
 @media (max-width: 360px) {

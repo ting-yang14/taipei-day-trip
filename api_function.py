@@ -121,10 +121,10 @@ def get_categories():
     try:
         connection = connection_pool.get_connection()
         cursor = connection.cursor()
-        get_category_query = "SELECT category FROM attraction;"
+        get_category_query = "SELECT DISTINCT category FROM attraction"
         cursor.execute(get_category_query)
         category = cursor.fetchall()
-        category_result = list(set(list(chain.from_iterable(category))))
+        category_result = list(chain.from_iterable(category))
         result = {"data": category_result}
     except Error as error:
         result = {"error": True, "message": error}

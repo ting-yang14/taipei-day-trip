@@ -32,25 +32,17 @@
       <div class="container">
         <div class="attraction-container">
           <div class="attraction">
-            <div class="gallery">
-              <img class="fade" src="/static/img/welcome.png" alt="" />
-              <img class="fade" src="/static/img/welcome.png" alt="" />
-              <img class="fade" src="/static/img/welcome.png" alt="" />
-            </div>
+            <div class="gallery"></div>
             <img class="prev" src="/static/img/btn_leftArrow.png" alt="" />
             <img class="next" src="/static/img/btn_rightArrow.png" alt="" />
-            <div class="pic-current">
-              <span class="dot"></span>
-              <span class="dot"></span>
-              <span class="dot"></span>
-            </div>
+            <div class="pic-current"></div>
           </div>
           <div class="booking">
-            <h3>平安鐘</h3>
+            <h3 id="name">平安鐘</h3>
             <div class="place">
-              <p class="reg">公共藝術</p>
+              <p class="reg" id="category">公共藝術</p>
               <p class="reg">at</p>
-              <p class="reg">忠孝復興</p>
+              <p class="reg" id="mrt">忠孝復興</p>
             </div>
             <div class="booking-container">
               <div class="field">
@@ -84,7 +76,7 @@
               </div>
               <div class="field">
                 <p class="bold">導覽費用：</p>
-                <p class="reg">新台幣 2000元</p>
+                <p class="reg" id="fee">新台幣 2000元</p>
               </div>
               <button class="booking-btn">開始預約行程</button>
             </div>

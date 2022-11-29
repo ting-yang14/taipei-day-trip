@@ -138,6 +138,7 @@ main {
   object-fit: cover;
   position: absolute;
   border-radius: 5px;
+  display: none;
 }
 .fade {
   animation-name: fade;
@@ -193,6 +194,9 @@ main {
 .dot:hover {
   background-color: var(--secondary-color-gray-50);
   border: 1px solid var(--secondary-color-gray-50);
+}
+.active {
+  background-color: var(--additional-color-black);
 }
 .booking {
   width: 50%;
@@ -251,11 +255,13 @@ input[type="radio"] {
 input[type="radio"]:checked {
   background-color: var(--primary-color-cyan-70);
 }
-.booking-container label {
+label {
   color: var(--secondary-color-gray-70);
   font-weight: var(--font-weight-medium);
   font-size: 16px;
   line-height: 13.3px;
+}
+label:first-of-type {
   margin-right: 18px;
 }
 .booking-btn {

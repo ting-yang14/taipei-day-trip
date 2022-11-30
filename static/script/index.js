@@ -93,6 +93,7 @@ function generateAttractionDiv(URL) {
 function loadAttractions(attractionList) {
   for (let i = 0; i < 12; i++) {
     let attractionDiv = createAttractionElement(
+      attractionList[i].id,
       attractionList[i].images[0],
       attractionList[i].name,
       attractionList[i].mrt,
@@ -102,7 +103,9 @@ function loadAttractions(attractionList) {
   }
 }
 
-function createAttractionElement(imgURL, name, mrt, category) {
+function createAttractionElement(attractionId, imgURL, name, mrt, category) {
+  const a = document.createElement("a");
+  a.href = `/attraction/${attractionId}`;
   const newDiv = document.createElement("div");
   newDiv.classList.add("attraction", "border");
   const attractionImg = document.createElement("img");
@@ -129,7 +132,8 @@ function createAttractionElement(imgURL, name, mrt, category) {
   newDiv.appendChild(attractionImg);
   newDiv.appendChild(nameDiv);
   newDiv.appendChild(infoDiv);
-  return newDiv;
+  a.appendChild(newDiv);
+  return a;
 }
 
 function createCategoryBtn(URL) {

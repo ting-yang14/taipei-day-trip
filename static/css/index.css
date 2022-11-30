@@ -48,6 +48,9 @@ p.reg {
   font-size: 16px;
   line-height: 13.3px;
 }
+a {
+  text-decoration: none;
+}
 .nav {
   width: 100%;
   position: fixed;

@@ -1,10 +1,11 @@
 from flask import *
-from api_function import get_categories, get_attraction, get_attractions
+from api.api import api
+
 app = Flask(__name__)
 app.config["JSON_AS_ASCII"] = False
 app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.register_blueprint(api, url_prefix="/api")
 
-# Pages
 @app.route("/")
 def index():
 	return render_template("index.html")
@@ -17,32 +18,6 @@ def booking():
 @app.route("/thankyou")
 def thankyou():
 	return render_template("thankyou.html")
-
-# api
-@app.route("/api/attractions", methods = ["GET"])
-def api_attractions():
-	page = request.args.get('page')
-	keyword = request.args.get('keyword')
-	result = get_attractions(page, keyword)
-	if "data" in result:
-		return jsonify(result), 200
-	return jsonify(result), 500
-	
-@app.route("/api/attraction/<int:attractionId>", methods = ["GET"])
-def api_attraction(attractionId):
-	result = get_attraction(attractionId)
-	if "data" in result:
-		return jsonify(result), 200
-	elif result["message"] == "attractionID not found":
-		return jsonify(result), 400
-	return jsonify(result), 500
-		
-@app.route("/api/categories", methods = ["GET"])
-def api_categories():
-	result = get_categories()
-	if "data" in result:
-		return jsonify(result), 200
-	return jsonify(result), 500
 
 if __name__ == '__main__':
 	app.run(host = '0.0.0.0', port = 3000, debug = True)

@@ -4,16 +4,14 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- <link
+    <link
       rel="stylesheet"
       href="{{ url_for('static', filename='/css/reset.css')}}"
     />
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='/css/attraction.css')}}"
-    /> -->
-    <link href="/static/css/reset.css" rel="stylesheet" type="text/css" />
-    <link href="/static/css/attraction.css" rel="stylesheet" type="text/css" />
+    />
     <title>Attraction</title>
   </head>
   <body>
@@ -33,8 +31,14 @@
         <div class="attraction-container">
           <div class="attraction">
             <div class="gallery"></div>
-            <img class="prev" src="/static/img/btn_leftArrow.png" alt="" />
-            <img class="next" src="/static/img/btn_rightArrow.png" alt="" />
+            <img
+              class="prev"
+              src="{{url_for('static', filename='img/btn_leftArrow.png')}}"
+            />
+            <img
+              class="next"
+              src="{{url_for('static', filename='img/btn_rightArrow.png')}}"
+            />
             <div class="pic-current"></div>
           </div>
           <div class="booking">
@@ -109,8 +113,6 @@
     <footer>
       <p class="bold">COPYRIGHT © 2021 台北一日遊</p>
     </footer>
-
-    <!-- <script src="{{url_for('static', filename='/script/attraction.js')}}"></script> -->
-    <script type="text/javascript" src="/static/script/attraction.js"></script>
+    <script src="{{url_for('static', filename='/script/attraction.js')}}"></script>
   </body>
 </html>

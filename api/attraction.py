@@ -1,4 +1,4 @@
-from itertools import chain
+from flask import Blueprint, jsonify, request
 from mysql.connector import Error, pooling
 
 dbconfig = {
@@ -14,6 +14,9 @@ connection_pool = pooling.MySQLConnectionPool(
     autocommit = True,
     **dbconfig
 )
+
+attraction = Blueprint("attraction", __name__)
+
 def generate_attraction_data(attraction_data_list):
     return {
         "id": attraction_data_list[0], 
@@ -27,12 +30,15 @@ def generate_attraction_data(attraction_data_list):
         "lng": attraction_data_list[8],
         "images": attraction_data_list[9].split(",")
     }
-def get_attractions(page, keyword = None):
+
+@attraction.route("/attractions", methods = ["GET"])
+def api_attractions():
+    page = request.args.get('page')
+    keyword = request.args.get('keyword')
     try:
         connection = connection_pool.get_connection()
         cursor = connection.cursor()
         page = int(page)
-        keyword_list = get_categories()["data"]
         if keyword == None:
             get_attractions_query = """
                 SELECT attraction.id, attraction.name, attraction.category, attraction.description, attraction.address,
@@ -44,29 +50,17 @@ def get_attractions(page, keyword = None):
             """
             val = (page * 12,)
             cursor.execute(get_attractions_query, val)
-        elif keyword in keyword_list:
-            get_attraction_by_category_query = """
-                SELECT attraction.id, attraction.name, attraction.category, attraction.description, attraction.address,
-                attraction.transport, attraction.mrt, attraction.lat, attraction.lng,
-                GROUP_CONCAT(img.url SEPARATOR ',')
-                FROM attraction INNER JOIN img on img.attraction_id=attraction.id
-                WHERE category = %s
-                GROUP BY attraction.id
-                LIMIT %s, 13
-            """
-            val = (keyword, page * 12,)
-            cursor.execute(get_attraction_by_category_query, val)
         else:
-            get_attraction_by_name_query = """
+            get_attraction_by_name_query ="""
                 SELECT attraction.id, attraction.name, attraction.category, attraction.description, attraction.address,
                 attraction.transport, attraction.mrt, attraction.lat, attraction.lng,
                 GROUP_CONCAT(img.url SEPARATOR ',')
                 FROM attraction INNER JOIN img on img.attraction_id=attraction.id
-                WHERE name LIKE %s
-                GROUP BY attraction.id
+                WHERE category = %s OR name LIKE %s
+                GROUP BY attraction.id 
                 LIMIT %s, 13
-            """
-            val = ('%' + keyword + '%', page * 12,)
+                """
+            val = (keyword, '%' + keyword + '%', page * 12,)
             cursor.execute(get_attraction_by_name_query, val)
         result_list = cursor.fetchall()
         data_list = []
@@ -88,9 +82,12 @@ def get_attractions(page, keyword = None):
         if connection.is_connected():
             cursor.close()
             connection.close()
-        return result
-
-def get_attraction(attractionId):
+        if "data" in result:
+            return jsonify(result), 200
+        return jsonify(result), 500
+    
+@attraction.route("/attraction/<int:attractionId>", methods = ["GET"])
+def api_attraction(attractionId):
     try:
         connection = connection_pool.get_connection()
         cursor = connection.cursor()
@@ -115,21 +112,8 @@ def get_attraction(attractionId):
         if connection.is_connected():
             cursor.close()
             connection.close()
-        return result
-
-def get_categories():
-    try:
-        connection = connection_pool.get_connection()
-        cursor = connection.cursor()
-        get_category_query = "SELECT DISTINCT category FROM attraction"
-        cursor.execute(get_category_query)
-        category = cursor.fetchall()
-        category_result = list(chain.from_iterable(category))
-        result = {"data": category_result}
-    except Error as error:
-        result = {"error": True, "message": error}
-    finally:
-        if connection.is_connected():
-            cursor.close()
-            connection.close()
-        return result
+        if "data" in result:
+            return jsonify(result), 200
+        elif result["message"] == "attractionID not found":
+            return jsonify(result), 400
+        return jsonify(result), 500

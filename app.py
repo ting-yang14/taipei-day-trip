@@ -1,10 +1,14 @@
 from flask import *
-from api.api import api
+from api.category import category
+from api.attraction import attraction
+from api.userauth import userauth
 
 app = Flask(__name__)
 app.config["JSON_AS_ASCII"] = False
 app.config["TEMPLATES_AUTO_RELOAD"] = True
-app.register_blueprint(api, url_prefix="/api")
+app.register_blueprint(category, url_prefix="/api")
+app.register_blueprint(attraction, url_prefix="/api")
+app.register_blueprint(userauth, url_prefix="/api")
 
 @app.route("/")
 def index():

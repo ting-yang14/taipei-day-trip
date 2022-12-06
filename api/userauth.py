@@ -22,14 +22,12 @@ userauth = Blueprint("userauth", __name__)
 @userauth.route("/user", methods = ["POST"])
 def user():
     req = request.get_json()
-    print(req)
     try:
         connection = connection_pool.get_connection()
         cursor = connection.cursor()
         check_email_query=f'SELECT EXISTS(SELECT * from member WHERE email="{req["email"]}")'
         cursor.execute(check_email_query)
         email_repeat=cursor.fetchone()
-        print(email_repeat[0])
         if email_repeat[0]:
             response=make_response({"error":"email has been used"}, 400)
         else:

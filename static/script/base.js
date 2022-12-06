@@ -5,7 +5,7 @@ const signBackground = document.querySelector(".sign-background");
 const closeIcons = document.querySelectorAll(".sign img");
 const registered = document.querySelector("#registered > p");
 const unregistered = document.querySelector("#unregistered > p");
-const signupHintContainer = document.getElementById("signinHintContainer");
+const signupHintContainer = document.getElementById("signupHintContainer");
 const signinHintContainer = document.getElementById("signinHintContainer");
 const signupHint = document.querySelector("#signupHintContainer > p");
 const signinHint = document.querySelector("#signinHintContainer > p");
@@ -42,7 +42,7 @@ fetch("/api/user/auth", {
     console.log(err);
   });
 
-function clearHintMessage() {
+function clearHint() {
   signupHintContainer.style.display = "none";
   signupHint.textContent = "";
   signinHintContainer.style.display = "none";
@@ -52,14 +52,14 @@ function clearHintMessage() {
 function showSigninWindow() {
   signup.className = signup.className.replace(" sign-container__active", "");
   signin.className += " sign-container__active";
-  clearHintMessage();
+  clearHint();
   document.getElementById("signupForm").reset();
 }
 
 function showSignupWindow() {
   signin.className = signin.className.replace(" sign-container__active", "");
   signup.className += " sign-container__active";
-  clearHintMessage();
+  clearHint();
   document.getElementById("signinForm").reset();
 }
 
@@ -68,7 +68,7 @@ function closeSignWindow() {
     " sign-background__active",
     ""
   );
-  clearHintMessage();
+  clearHint();
 }
 
 registered.addEventListener("click", showSigninWindow);

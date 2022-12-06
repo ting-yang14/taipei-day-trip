@@ -59,18 +59,22 @@ function showCurrentImage(n) {
 fetch(`/api${window.location.pathname}`)
   .then((response) => response.json())
   .then((data) => {
-    document.querySelector("title").textContent = data.data.name;
-    loadImage(data.data.images);
-    createCurrentImageDot(data.data.images);
-    attractionName.textContent = data.data.name;
-    category.textContent = data.data.category;
-    mrt.textContent = data.data.mrt;
-    description.textContent = data.data.description;
-    address.textContent = data.data.address;
-    transport.textContent = data.data.transport;
-    showImage(imageIndex);
-    next.addEventListener("click", addImageIndex.bind(null, 1));
-    prev.addEventListener("click", addImageIndex.bind(null, -1));
+    if (data.data) {
+      document.querySelector("title").textContent = data.data.name;
+      loadImage(data.data.images);
+      createCurrentImageDot(data.data.images);
+      attractionName.textContent = data.data.name;
+      category.textContent = data.data.category;
+      mrt.textContent = data.data.mrt;
+      description.textContent = data.data.description;
+      address.textContent = data.data.address;
+      transport.textContent = data.data.transport;
+      showImage(imageIndex);
+      next.addEventListener("click", addImageIndex.bind(null, 1));
+      prev.addEventListener("click", addImageIndex.bind(null, -1));
+    } else {
+      document.querySelector("title").textContent = data.message;
+    }
   })
   .catch((error) => {
     console.log(error);

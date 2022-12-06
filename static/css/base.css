@@ -159,7 +159,6 @@ form input {
   padding: 15px;
   margin-bottom: 15px;
   border-radius: 5px;
-  cursor: pointer;
 }
 form input::placeholder {
   font-weight: var(--font-weight-medium);

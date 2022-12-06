@@ -59,6 +59,7 @@ function showCurrentImage(n) {
 fetch(`/api${window.location.pathname}`)
   .then((response) => response.json())
   .then((data) => {
+    document.querySelector("title").textContent = data.data.name;
     loadImage(data.data.images);
     createCurrentImageDot(data.data.images);
     attractionName.textContent = data.data.name;

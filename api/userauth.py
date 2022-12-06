@@ -1,5 +1,4 @@
-from flask import Blueprint, jsonify, request, make_response
-import json
+from flask import Blueprint, request, make_response
 import jwt
 from datetime import datetime, timedelta
 from mysql.connector import Error, pooling
@@ -19,8 +18,6 @@ connection_pool = pooling.MySQLConnectionPool(
 )
 
 userauth = Blueprint("userauth", __name__)
-
-
 
 @userauth.route("/user", methods = ["POST"])
 def user():
@@ -47,22 +44,26 @@ def user():
             connection.close()
         return response
         
-    
-    
 @userauth.route("/user/auth", methods = ["GET", "PUT", "DELETE"])
 def auth():
-    # if request.method=="GET":
-    #     result={
-    #             "data": {
-    #                     "id": 1,
-    #                     "name": "彭彭彭",
-    #                     "email": "ply@ply.com"
-    #                     }
-    #             }
-    #     return jsonify(result), 200
+    if request.method=="GET":
+        access_token = request.cookies.get('access_token')
+        if access_token:
+            try:
+                connection = connection_pool.get_connection()
+                cursor = connection.cursor()
+                decode_token=jwt.decode(access_token, "secret_key", algorithms="HS256")
+                get_member_info_query=f'SELECT id, name, email FROM member WHERE id="{decode_token["id"]}"'
+                cursor.execute(get_member_info_query)
+                member_info=cursor.fetchone()
+                response=make_response({"data":{"id":member_info[0], "name":member_info[1],"email":member_info[2]}}, 200)
+            except Error as error:
+                response=make_response({"error":error}, 500)
+        else:
+            response=make_response({"data":None}, 200)
+        return response
     if request.method=="PUT":
         req = request.get_json()
-        print(req)
         try:
             connection = connection_pool.get_connection()
             cursor = connection.cursor()
@@ -70,14 +71,10 @@ def auth():
             cursor.execute(check_auth_query)
             member_info=cursor.fetchone()
             if member_info:
-                token = jwt.encode({'id': member_info[0],'expiration': str(datetime.now() + timedelta(days=7))
+                token = jwt.encode({'id': member_info[0]
                 },"secret_key","HS256")
-                print(token)
-                detoken=jwt.decode(token, "secret_key", algorithms="HS256")
-                print(detoken)
-                
                 response=make_response({"ok":True}, 200)
-                response.set_cookie('access_token', token)
+                response.set_cookie('access_token', token, expires=datetime.now() + timedelta(days=7))
             else:
                 response=make_response({"error":"email or password incorrect"}, 400)
         except Error as error:
@@ -87,4 +84,7 @@ def auth():
                 cursor.close()
                 connection.close()
             return response
-    # if request.method=="DELETE":
+    if request.method=="DELETE":
+        response=make_response({"ok":True}, 200)
+        response.set_cookie('access_token', "", expires=0)
+        return response

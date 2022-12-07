@@ -1,9 +1,9 @@
-from flask import Blueprint, jsonify, request
-from mysql.connector import Error, pooling
+from flask import Blueprint, request, make_response
+from mysql.connector import pooling
 
 dbconfig = {
     "host": "localhost",
-    "user":"root",
+    "user": "root",
     "password": "TaipeiNO1",
     "database": "taipei_day_trip"
 }
@@ -15,6 +15,7 @@ connection_pool = pooling.MySQLConnectionPool(
     **dbconfig
 )
 
+headers = {"Content-Type": "application/json"}
 attraction = Blueprint("attraction", __name__)
 
 def generate_attraction_data(attraction_data_list):
@@ -51,7 +52,7 @@ def api_attractions():
             val = (page * 12,)
             cursor.execute(get_attractions_query, val)
         else:
-            get_attraction_by_name_query ="""
+            get_attraction_by_name_query = """
                 SELECT attraction.id, attraction.name, attraction.category, attraction.description, attraction.address,
                 attraction.transport, attraction.mrt, attraction.lat, attraction.lng,
                 GROUP_CONCAT(img.url SEPARATOR ',')
@@ -69,22 +70,21 @@ def api_attractions():
             for i in range(0, 13):
                 attraction = generate_attraction_data(result_list[i])
                 data_list.append(attraction)
-            result = {"nextPage": nextPage, "data": data_list}
         else:
             nextPage = None
             for i in range(0, len(result_list)):
                 attraction = generate_attraction_data(result_list[i])
                 data_list.append(attraction)
-            result = {"nextPage": nextPage, "data": data_list}
-    except Error as error:
-        result = {"error": True, "message": error}
+        response = make_response({"nextPage": nextPage, "data": data_list}, 200, headers)
+        return response
+    except Exception as e:
+        print(e)
+        response = make_response({"error": True, "message": "伺服器內部錯誤"}, 500, headers)
+        return response
     finally:
         if connection.is_connected():
             cursor.close()
             connection.close()
-        if "data" in result:
-            return jsonify(result), 200
-        return jsonify(result), 500
     
 @attraction.route("/attraction/<int:attractionId>", methods = ["GET"])
 def api_attraction(attractionId):
@@ -103,17 +103,16 @@ def api_attraction(attractionId):
         cursor.execute(get_attraction_query, val)
         result_list = cursor.fetchone()
         if not result_list:
-            result = {"error": True, "message": "attractionID not found"}
+            response = make_response({"error": True, "message": "景點編號不正確"}, 400, headers)
+            return response
         data = generate_attraction_data(result_list)
-        result = {"data": data}
-    except Error as error:
-        result = {"error": True, "message": error}
+        response = make_response({"data": data}, 200, headers)
+        return response
+    except Exception as e:
+        print(e)
+        response = make_response({"error": True, "message": "伺服器內部錯誤"}, 500, headers)
+        return response
     finally:
         if connection.is_connected():
             cursor.close()
             connection.close()
-        if "data" in result:
-            return jsonify(result), 200
-        elif result["message"] == "attractionID not found":
-            return jsonify(result), 400
-        return jsonify(result), 500

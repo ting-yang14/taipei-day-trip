@@ -44,6 +44,7 @@ function setCategory(event) {
   searchInput.value = category;
   categoryList.style.display = "none";
 }
+
 function generateBasicAttractions() {
   fetch(`${attractionsApi}${nextPage.toString()}&keyword=${keyword}`)
     .then((response) => response.json())

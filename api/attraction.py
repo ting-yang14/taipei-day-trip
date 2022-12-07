@@ -1,9 +1,9 @@
-from itertools import chain
-from mysql.connector import Error, pooling
+from flask import Blueprint, request, make_response
+from mysql.connector import pooling
 
 dbconfig = {
     "host": "localhost",
-    "user":"root",
+    "user": "root",
     "password": "TaipeiNO1",
     "database": "taipei_day_trip"
 }
@@ -14,6 +14,10 @@ connection_pool = pooling.MySQLConnectionPool(
     autocommit = True,
     **dbconfig
 )
+
+headers = {"Content-Type": "application/json"}
+attraction = Blueprint("attraction", __name__)
+
 def generate_attraction_data(attraction_data_list):
     return {
         "id": attraction_data_list[0], 
@@ -27,12 +31,15 @@ def generate_attraction_data(attraction_data_list):
         "lng": attraction_data_list[8],
         "images": attraction_data_list[9].split(",")
     }
-def get_attractions(page, keyword = None):
+
+@attraction.route("/attractions", methods = ["GET"])
+def api_attractions():
+    page = request.args.get('page')
+    keyword = request.args.get('keyword')
     try:
         connection = connection_pool.get_connection()
         cursor = connection.cursor()
         page = int(page)
-        keyword_list = get_categories()["data"]
         if keyword == None:
             get_attractions_query = """
                 SELECT attraction.id, attraction.name, attraction.category, attraction.description, attraction.address,
@@ -44,29 +51,17 @@ def get_attractions(page, keyword = None):
             """
             val = (page * 12,)
             cursor.execute(get_attractions_query, val)
-        elif keyword in keyword_list:
-            get_attraction_by_category_query = """
-                SELECT attraction.id, attraction.name, attraction.category, attraction.description, attraction.address,
-                attraction.transport, attraction.mrt, attraction.lat, attraction.lng,
-                GROUP_CONCAT(img.url SEPARATOR ',')
-                FROM attraction INNER JOIN img on img.attraction_id=attraction.id
-                WHERE category = %s
-                GROUP BY attraction.id
-                LIMIT %s, 13
-            """
-            val = (keyword, page * 12,)
-            cursor.execute(get_attraction_by_category_query, val)
         else:
             get_attraction_by_name_query = """
                 SELECT attraction.id, attraction.name, attraction.category, attraction.description, attraction.address,
                 attraction.transport, attraction.mrt, attraction.lat, attraction.lng,
                 GROUP_CONCAT(img.url SEPARATOR ',')
                 FROM attraction INNER JOIN img on img.attraction_id=attraction.id
-                WHERE name LIKE %s
-                GROUP BY attraction.id
+                WHERE category = %s OR name LIKE %s
+                GROUP BY attraction.id 
                 LIMIT %s, 13
-            """
-            val = ('%' + keyword + '%', page * 12,)
+                """
+            val = (keyword, '%' + keyword + '%', page * 12,)
             cursor.execute(get_attraction_by_name_query, val)
         result_list = cursor.fetchall()
         data_list = []
@@ -75,22 +70,24 @@ def get_attractions(page, keyword = None):
             for i in range(0, 13):
                 attraction = generate_attraction_data(result_list[i])
                 data_list.append(attraction)
-            result = {"nextPage": nextPage, "data": data_list}
         else:
             nextPage = None
             for i in range(0, len(result_list)):
                 attraction = generate_attraction_data(result_list[i])
                 data_list.append(attraction)
-            result = {"nextPage": nextPage, "data": data_list}
-    except Error as error:
-        result = {"error": True, "message": error}
+        response = make_response({"nextPage": nextPage, "data": data_list}, 200, headers)
+        return response
+    except Exception as e:
+        print(e)
+        response = make_response({"error": True, "message": "伺服器內部錯誤"}, 500, headers)
+        return response
     finally:
         if connection.is_connected():
             cursor.close()
             connection.close()
-        return result
-
-def get_attraction(attractionId):
+    
+@attraction.route("/attraction/<int:attractionId>", methods = ["GET"])
+def api_attraction(attractionId):
     try:
         connection = connection_pool.get_connection()
         cursor = connection.cursor()
@@ -106,30 +103,16 @@ def get_attraction(attractionId):
         cursor.execute(get_attraction_query, val)
         result_list = cursor.fetchone()
         if not result_list:
-            result = {"error": True, "message": "attractionID not found"}
+            response = make_response({"error": True, "message": "景點編號不正確"}, 400, headers)
+            return response
         data = generate_attraction_data(result_list)
-        result = {"data": data}
-    except Error as error:
-        result = {"error": True, "message": error}
+        response = make_response({"data": data}, 200, headers)
+        return response
+    except Exception as e:
+        print(e)
+        response = make_response({"error": True, "message": "伺服器內部錯誤"}, 500, headers)
+        return response
     finally:
         if connection.is_connected():
             cursor.close()
             connection.close()
-        return result
-
-def get_categories():
-    try:
-        connection = connection_pool.get_connection()
-        cursor = connection.cursor()
-        get_category_query = "SELECT DISTINCT category FROM attraction"
-        cursor.execute(get_category_query)
-        category = cursor.fetchall()
-        category_result = list(chain.from_iterable(category))
-        result = {"data": category_result}
-    except Error as error:
-        result = {"error": True, "message": error}
-    finally:
-        if connection.is_connected():
-            cursor.close()
-            connection.close()
-        return result

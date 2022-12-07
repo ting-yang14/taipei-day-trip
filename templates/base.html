@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='/css/reset.css')}}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='/css/base.css')}}"
+    />
+    {% block head %}{% endblock %}
+    <title>{% block title %}{% endblock %}</title>
+  </head>
+  <body>
+    <div class="sign-background">
+      <div class="sign-container" id="signin">
+        <div class="decorate"></div>
+        <div class="sign">
+          <div class="title">登入會員帳號</div>
+          <img src="{{url_for('static', filename='/img/icon_close.png')}}" />
+          <form method="PUT" id="signinForm">
+            <input
+              type="email"
+              name="email"
+              id="signinEmail"
+              pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+              size="30"
+              placeholder="輸入電子信箱"
+              required
+            />
+            <input
+              type="password"
+              name="password"
+              id="signinPassword"
+              minlength="8"
+              placeholder="輸入密碼"
+              required
+            />
+            <input type="submit" class="submit-btn" value="登入帳戶" />
+          </form>
+          <div class="hint-container" id="signinHintContainer">
+            <p class="hint"></p>
+          </div>
+          <div class="register" id="unregistered">
+            <p class="reg">還沒有帳戶？點此註冊</p>
+          </div>
+        </div>
+      </div>
+      <div class="sign-container" id="signup">
+        <div class="decorate"></div>
+        <div class="sign">
+          <div class="title">註冊會員帳號</div>
+          <img src="{{url_for('static', filename='/img/icon_close.png')}}" />
+          <form method="POST" id="signupForm">
+            <input
+              type="text"
+              name="name"
+              id="signupUsername"
+              size="30"
+              placeholder="輸入姓名"
+              required
+            />
+            <input
+              type="email"
+              name="email"
+              id="signupEmail"
+              pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+              size="30"
+              placeholder="輸入電子信箱"
+              required
+            />
+            <input
+              type="password"
+              name="password"
+              id="signupPassword"
+              minlength="8"
+              placeholder="輸入密碼"
+              required
+            />
+            <input type="submit" class="submit-btn" value="註冊新帳戶" />
+          </form>
+          <div class="hint-container" id="signupHintContainer">
+            <p class="hint"></p>
+          </div>
+          <div class="register" id="registered">
+            <p class="reg">已經有帳戶了？點此登入</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <nav>
+      <div class="nav">
+        <div class="nav-container">
+          <a href="/"><h2>台北一日遊</h2></a>
+          <div class="nav-btn-container">
+            <button class="nav-btn">預定行程</button>
+            <button class="nav-btn" id="signBtn">登入/註冊</button>
+          </div>
+        </div>
+      </div>
+    </nav>
+    {% block content %}{% endblock %}
+    <footer>
+      <p class="bold">COPYRIGHT © 2022 台北一日遊</p>
+    </footer>
+    {% block script %}{% endblock %}
+    <script src="{{url_for('static', filename='/script/base.js')}}"></script>
+  </body>
+</html>

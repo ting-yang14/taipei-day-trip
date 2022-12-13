@@ -62,7 +62,6 @@ function filterAttractions() {
   fetch(`${attractionsApi}${nextPage.toString()}&keyword=${keyword}`)
     .then((response) => response.json())
     .then((data) => {
-      console.log(data.data);
       if (data.data.length === 0) {
         alert("查無此景點！！");
       } else {

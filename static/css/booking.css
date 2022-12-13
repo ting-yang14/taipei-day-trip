@@ -1,0 +1,163 @@
+.info_container {
+  width: 1200px;
+  margin: 0 auto;
+  padding: 40px 110px;
+  box-sizing: border-box;
+}
+hr {
+  width: 1200px;
+  margin: 0 auto;
+}
+p.title {
+  font-weight: var(--font-weight-bold);
+  font-size: 19px;
+  line-height: 16px;
+  padding: 4px 0;
+  margin-bottom: 5px;
+}
+p.content {
+  font-weight: var(--font-weight-bold);
+  font-size: 16px;
+  line-height: 23.17px;
+}
+.info_container:first-child {
+  margin-top: 54px;
+}
+.text {
+  display: flex;
+  align-items: center;
+  color: var(--secondary-color-gray-70);
+}
+.info_container:first-child .text:first-child {
+  padding: 2px 0 1px 0;
+}
+.text p {
+  flex: none;
+}
+.booking_context {
+  display: none;
+}
+.noBooking_context {
+  display: none;
+  padding-top: 25px;
+}
+/* footer {
+  height: calc(100vh - 197.3px);
+} */
+.attraction_info {
+  display: flex;
+  padding-top: 25px;
+}
+.attraction_info img:first-child {
+  width: 266px;
+  height: 200px;
+  flex: none;
+}
+.booking_info {
+  margin-left: 22px;
+  flex: auto;
+  position: relative;
+}
+.booking_info .text:first-child {
+  color: var(--primary-color-cyan-70);
+  padding: 5px 0;
+  margin-bottom: 15px;
+}
+.booking_info .text {
+  padding: 10px 0;
+}
+.booking_info .text p:first-child {
+  margin-right: 5px;
+}
+.booking_info img {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+input {
+  padding: 10px;
+  box-sizing: border-box;
+  height: 38px;
+  width: 200px;
+  border-radius: 5px;
+  border: 1px solid var(--secondary-color-gray-20);
+  font-size: 16px;
+  font-weight: var(--font-weight-medium);
+  line-height: 13px;
+  color: var(--additional-color-black);
+}
+::placeholder {
+  color: var(--secondary-color-gray-50);
+  font-size: 16px;
+  font-weight: var(--font-weight-medium);
+  line-height: 13px;
+}
+.contact_container .text,
+.card_container .text {
+  padding-top: 15px;
+}
+.info_container:last-child {
+  text-align: right;
+}
+.info_container:last-child .text {
+  justify-content: end;
+  padding: 3px 0;
+}
+.booking-btn {
+  font-weight: var(--font-weight-normal);
+  font-size: 19px;
+  line-height: 16px;
+  color: var(--additional-color-white);
+  padding: 10px 20px;
+  background-color: var(--primary-color-cyan-70);
+  border-radius: 5px;
+  border: none;
+  width: fit-content;
+  margin: 22px 0;
+  cursor: pointer;
+}
+@media (max-width: 1200px) {
+  .info_container {
+    width: 90%;
+    padding: 40px 0px;
+  }
+  hr {
+    width: 90%;
+  }
+}
+@media (max-width: 768px) {
+  .info_container {
+    width: 100%;
+    padding: 40px 10px;
+  }
+  .info_container:first-child {
+    padding: 40px 10px 30px 10px;
+  }
+  .attraction_info {
+    flex-wrap: wrap;
+  }
+  .attraction_info img:first-child {
+    width: 100%;
+  }
+  .booking_info {
+    width: 100%;
+    margin: 0px;
+    position: static;
+    padding-top: 25px;
+  }
+  .booking_info img {
+    position: static;
+    display: inline;
+    float: right;
+  }
+  .contact_container .text:last-child {
+    width: 100%;
+  }
+  .contact_container .text:last-child p {
+    width: 100%;
+  }
+  hr {
+    width: calc(100% - 20px);
+    box-sizing: border-box;
+  }
+}

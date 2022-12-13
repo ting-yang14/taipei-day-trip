@@ -40,21 +40,16 @@
           </div>
           <div class="field">
             <p class="bold">選擇時間：</p>
-            <input type="radio" id="morning" name="trip-time" value="morning" />
+            <input type="radio" id="morning" name="time" value="morning" />
             <label for="morning">上半天</label>
-            <input
-              type="radio"
-              id="afternoon"
-              name="trip-time"
-              value="afternoon"
-            />
+            <input type="radio" id="afternoon" name="time" value="afternoon" />
             <label for="afternoon">下半天</label>
           </div>
           <div class="field">
             <p class="bold">導覽費用：</p>
-            <p class="reg" id="fee">新台幣 2000元</p>
+            <p class="reg" id="price">新台幣 2000元</p>
           </div>
-          <button class="booking-btn">開始預約行程</button>
+          <button class="startBookingBtn">開始預約行程</button>
         </div>
       </div>
     </div>
@@ -77,5 +72,8 @@
   </div>
 </main>
 {% endblock %} {% block script %}
-<script src="{{url_for('static', filename='/script/attraction.js')}}"></script>
+<script
+  type="module"
+  src="{{url_for('static', filename='/script/attraction.js')}}"
+></script>
 {% endblock %}

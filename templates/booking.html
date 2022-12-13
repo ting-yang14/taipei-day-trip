@@ -1,0 +1,127 @@
+{% extends "base.html" %}{% block head %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='/css/booking.css')}}"
+/>{% endblock %}{% block title %}{% endblock %} {% block content %}
+<main>
+  <div class="info_container">
+    <div class="text">
+      <p class="title">您好，</p>
+      <p class="title" id="username"></p>
+      <p class="title">，待預定的行程如下：</p>
+    </div>
+    <div class="noBooking_context">
+      <div class="text">
+        <p class="reg">目前沒有任何待預訂的行程</p>
+      </div>
+    </div>
+    <div class="booking_context">
+      <div class="attraction_info">
+        <img
+          src="{{url_for('static', filename='img/welcome.png')}}"
+          id="attractionImg"
+        />
+        <div class="booking_info">
+          <div class="text">
+            <p class="bold">台北一日遊：</p>
+            <p class="bold" id="attractionName"></p>
+          </div>
+          <div class="text">
+            <p class="bold">日期：</p>
+            <p class="reg" id="date"></p>
+          </div>
+          <div class="text">
+            <p class="bold">時間：</p>
+            <p class="reg" id="time"></p>
+          </div>
+          <div class="text">
+            <p class="bold">費用：</p>
+            <p class="reg" id="price"></p>
+          </div>
+          <div class="text">
+            <p class="bold">地點：</p>
+            <p class="reg" id="address"></p>
+          </div>
+          <img
+            src="{{url_for('static', filename='img/icon_delete.png')}}"
+            id="delete"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="booking_context">
+    <hr />
+    <div class="info_container">
+      <div class="text"><p class="title">您的聯絡資訊</p></div>
+      <div class="contact_container">
+        <div class="text">
+          <p class="reg">聯絡姓名：</p>
+          <input type="text" id="name" />
+        </div>
+        <div class="text">
+          <p class="reg">聯絡信箱：</p>
+          <input type="email" id="email" />
+        </div>
+        <div class="text">
+          <p class="reg">手機號碼：</p>
+          <input type="tel" id="phone" />
+        </div>
+        <div class="text">
+          <p class="content">
+            請保持手機暢通，準時到達，導覽人員將用手機與您聯繫，務必留下正確的聯絡方式。
+          </p>
+        </div>
+      </div>
+    </div>
+    <hr />
+    <div class="info_container">
+      <div class="text"><p class="title">信用卡付款資訊</p></div>
+      <div class="card_container">
+        <div class="text">
+          <p class="reg">卡片號碼：</p>
+          <input
+            type="text"
+            id="card_num"
+            inputmode="numeric"
+            pattern="[0-9\s]{13,19}"
+            autocomplete="cc-number"
+            maxlength="19"
+            placeholder="**** **** **** ****"
+          />
+        </div>
+        <div class="text">
+          <p class="reg">過期時間：</p>
+          <input
+            type="text"
+            id="exp"
+            autocomplete="cc-exp"
+            maxlength="4"
+            placeholder="MM/YY"
+          />
+        </div>
+        <div class="text">
+          <p class="reg">驗證密碼：</p>
+          <input
+            type="text"
+            id="cvv"
+            autocomplete="cc-csc"
+            maxlength="3"
+            placeholder="CVV"
+          />
+        </div>
+      </div>
+    </div>
+    <hr />
+    <div class="info_container">
+      <div class="text">
+        <p class="bold">總價：</p>
+        <p class="bold" id="totalPrice">新台幣 2000 元</p>
+      </div>
+      <button class="booking-btn">確認訂購並付款</button>
+    </div>
+  </div>
+</main>
+{% endblock %} {% block script %}
+<script src="{{url_for('static', filename='/script/booking.js')}}"></script>
+{% endblock %}

@@ -1,12 +1,16 @@
+import os
+from dotenv import load_dotenv
 from flask import Blueprint, make_response
 from itertools import chain
 from mysql.connector import pooling
 
+load_dotenv()
+
 dbconfig = {
-    "host": "localhost",
-    "user": "root",
-    "password": "TaipeiNO1",
-    "database": "taipei_day_trip"
+    "host": os.getenv('DB_HOST'),
+    "user": os.getenv('DB_USER'),
+    "password": os.getenv('DB_PASSWORD'),
+    "database": os.getenv('DB_DATABASE')
 }
 connection_pool = pooling.MySQLConnectionPool(
     pool_name = "test",
@@ -20,11 +24,14 @@ headers={"Content-Type": "application/json"}
 category = Blueprint("category", __name__)
         
 @category.route("/categories", methods = ["GET"])
-def api_categories():
+def get():
     try:
         connection = connection_pool.get_connection()
         cursor = connection.cursor()
-        get_category_query = f'SELECT DISTINCT category FROM attraction'
+        get_category_query = """
+            SELECT DISTINCT category 
+            FROM attraction
+        """
         cursor.execute(get_category_query)
         category = cursor.fetchall()
         category_result = list(chain.from_iterable(category))

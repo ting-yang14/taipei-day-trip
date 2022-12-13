@@ -1,11 +1,16 @@
+import os
+from dotenv import load_dotenv
 from flask import Blueprint, request, make_response
 from mysql.connector import pooling
+# from .database import database
+
+load_dotenv()
 
 dbconfig = {
-    "host": "localhost",
-    "user": "root",
-    "password": "TaipeiNO1",
-    "database": "taipei_day_trip"
+    "host": os.getenv('DB_HOST'),
+    "user": os.getenv('DB_USER'),
+    "password": os.getenv('DB_PASSWORD'),
+    "database": os.getenv('DB_DATABASE')
 }
 connection_pool = pooling.MySQLConnectionPool(
     pool_name = "test",
@@ -17,6 +22,7 @@ connection_pool = pooling.MySQLConnectionPool(
 
 headers = {"Content-Type": "application/json"}
 attraction = Blueprint("attraction", __name__)
+# connection_pool=database.db_setting()
 
 def generate_attraction_data(attraction_data_list):
     return {
@@ -52,7 +58,7 @@ def api_attractions():
             val = (page * 12,)
             cursor.execute(get_attractions_query, val)
         else:
-            get_attraction_by_name_query = """
+            get_attraction_by_keyword_query = """
                 SELECT attraction.id, attraction.name, attraction.category, attraction.description, attraction.address,
                 attraction.transport, attraction.mrt, attraction.lat, attraction.lng,
                 GROUP_CONCAT(img.url SEPARATOR ',')
@@ -60,9 +66,9 @@ def api_attractions():
                 WHERE category = %s OR name LIKE %s
                 GROUP BY attraction.id 
                 LIMIT %s, 13
-                """
+            """
             val = (keyword, '%' + keyword + '%', page * 12,)
-            cursor.execute(get_attraction_by_name_query, val)
+            cursor.execute(get_attraction_by_keyword_query, val)
         result_list = cursor.fetchall()
         data_list = []
         if len(result_list) == 13:

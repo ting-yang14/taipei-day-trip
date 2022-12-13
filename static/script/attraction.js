@@ -1,15 +1,46 @@
+import { showSignWindow, redirectBooking } from "./base.js";
+
 const gallery = document.querySelector(".gallery");
 const picCurrent = document.querySelector(".pic-current");
 const attractionName = document.getElementById("name");
 const category = document.getElementById("category");
 const mrt = document.getElementById("mrt");
-const fee = document.getElementById("fee");
+const price = document.getElementById("price");
 const description = document.getElementById("description");
 const address = document.getElementById("address");
 const transport = document.getElementById("transport");
 const next = document.querySelector(".next");
 const prev = document.querySelector(".prev");
+const startBookingBtn = document.querySelector(".startBookingBtn");
+const date = document.getElementById("date");
+
 let imageIndex = 0;
+let attractionId = -1;
+
+fetch(`/api${window.location.pathname}`)
+  .then((response) => response.json())
+  .then((data) => {
+    if (data.data) {
+      attractionId = data.data.id;
+      document.querySelector("title").textContent = data.data.name;
+      loadImage(data.data.images);
+      createCurrentImageDot(data.data.images);
+      attractionName.textContent = data.data.name;
+      category.textContent = data.data.category;
+      mrt.textContent = data.data.mrt;
+      description.textContent = data.data.description;
+      address.textContent = data.data.address;
+      transport.textContent = data.data.transport;
+      showImage(imageIndex);
+      next.addEventListener("click", addImageIndex.bind(null, 1));
+      prev.addEventListener("click", addImageIndex.bind(null, -1));
+    } else {
+      document.querySelector("title").textContent = data.message;
+    }
+  })
+  .catch((error) => {
+    console.log(error);
+  });
 
 function loadImage(imgURLList) {
   for (let i = 0; i < imgURLList.length; i++) {
@@ -38,10 +69,10 @@ function showImage(n) {
   if (n < 0) {
     imageIndex = images.length - 1;
   }
-  for (i = 0; i < images.length; i++) {
+  for (let i = 0; i < images.length; i++) {
     images[i].style.display = "none";
   }
-  for (i = 0; i < dots.length; i++) {
+  for (let i = 0; i < dots.length; i++) {
     dots[i].className = dots[i].className.replace(" active", "");
   }
   images[imageIndex].style.display = "block";
@@ -56,40 +87,81 @@ function showCurrentImage(n) {
   showImage((imageIndex = n));
 }
 
-fetch(`/api${window.location.pathname}`)
-  .then((response) => response.json())
-  .then((data) => {
-    if (data.data) {
-      document.querySelector("title").textContent = data.data.name;
-      loadImage(data.data.images);
-      createCurrentImageDot(data.data.images);
-      attractionName.textContent = data.data.name;
-      category.textContent = data.data.category;
-      mrt.textContent = data.data.mrt;
-      description.textContent = data.data.description;
-      address.textContent = data.data.address;
-      transport.textContent = data.data.transport;
-      showImage(imageIndex);
-      next.addEventListener("click", addImageIndex.bind(null, 1));
-      prev.addEventListener("click", addImageIndex.bind(null, -1));
-    } else {
-      document.querySelector("title").textContent = data.message;
-    }
-  })
-  .catch((error) => {
-    console.log(error);
-  });
-
-document.querySelectorAll('input[name="trip-time"]').forEach((element) => {
+document.querySelectorAll('input[name="time"]').forEach((element) => {
   element.addEventListener("change", function (e) {
     let target = e.target;
     switch (target.id) {
       case "morning":
-        fee.textContent = "新台幣 2000元";
+        price.textContent = "新台幣 2000元";
         break;
       case "afternoon":
-        fee.textContent = "新台幣 2500元";
+        price.textContent = "新台幣 2500元";
         break;
     }
   });
 });
+
+startBookingBtn.addEventListener("click", handleStartBooking);
+
+function handleStartBooking() {
+  fetch("/api/user/auth", {
+    method: "GET",
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.data != null) {
+        bookTrip();
+      } else {
+        showSignWindow();
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}
+
+function bookTrip() {
+  if (checkOrderInfo()) {
+    let bookingInfo = {
+      attractionId: attractionId,
+      date: date.value,
+      time: document.querySelector('input[name="time"]:checked').value,
+      price: parseInt(price.textContent.slice(4, 8)),
+    };
+    console.log(JSON.stringify(bookingInfo));
+    fetch("/api/booking", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(bookingInfo),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.ok) {
+          redirectBooking();
+        } else {
+          alert("請確認預訂資料是否正確");
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  } else {
+    return;
+  }
+}
+
+date.min = new Date().toISOString().slice(0, 10);
+
+function checkOrderInfo() {
+  let date = document.getElementById("date").value;
+  let time = document.querySelector('input[name="time"]:checked');
+  if (date === "") {
+    alert("請選擇行程日期");
+    return false;
+  }
+  if (time === null) {
+    alert("請選擇行程時間");
+    return false;
+  }
+  return true;
+}

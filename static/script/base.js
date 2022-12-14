@@ -24,7 +24,11 @@ fetch("/api/user/auth", {
       bookingBtn.addEventListener("click", redirectBooking);
       if (window.location.pathname === "/booking") {
         const username = document.getElementById("username");
+        const name = document.getElementById("name");
+        const email = document.getElementById("email");
         username.textContent = data.data.name;
+        name.value = data.data.name;
+        email.value = data.data.email;
       }
     } else {
       signBtn.addEventListener("click", showSignWindow);
@@ -107,9 +111,7 @@ function handleSigninSubmit(e) {
     },
     body: JSON.stringify(infoValue),
   })
-    .then((res) => {
-      return res.json();
-    })
+    .then((res) => res.json())
     .then((data) => {
       if (data.ok) {
         signinHintContainer.style.display = "flex";

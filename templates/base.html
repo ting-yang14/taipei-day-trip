@@ -97,7 +97,7 @@
         <div class="nav-container">
           <a href="/"><h2>台北一日遊</h2></a>
           <div class="nav-btn-container">
-            <button class="nav-btn">預定行程</button>
+            <button class="nav-btn" id="bookingBtn">預定行程</button>
             <button class="nav-btn" id="signBtn">登入/註冊</button>
           </div>
         </div>
@@ -107,7 +107,10 @@
     <footer>
       <p class="bold">COPYRIGHT © 2022 台北一日遊</p>
     </footer>
+    <script
+      type="module"
+      src="{{url_for('static', filename='/script/base.js')}}"
+    ></script>
     {% block script %}{% endblock %}
-    <script src="{{url_for('static', filename='/script/base.js')}}"></script>
   </body>
 </html>

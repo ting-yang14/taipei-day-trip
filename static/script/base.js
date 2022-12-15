@@ -9,6 +9,38 @@ const signupHintContainer = document.getElementById("signupHintContainer");
 const signinHintContainer = document.getElementById("signinHintContainer");
 const signupHint = document.querySelector("#signupHintContainer > p");
 const signinHint = document.querySelector("#signinHintContainer > p");
+const bookingBtn = document.getElementById("bookingBtn");
+const signupForm = document.getElementById("signupForm");
+const signinForm = document.getElementById("signinForm");
+
+fetch("/api/user/auth", {
+  method: "GET",
+})
+  .then((res) => res.json())
+  .then((data) => {
+    if (data.data) {
+      signBtn.textContent = "登出系統";
+      signBtn.addEventListener("click", logout);
+      bookingBtn.addEventListener("click", redirectBooking);
+      if (window.location.pathname === "/booking") {
+        const username = document.getElementById("username");
+        const name = document.getElementById("name");
+        const email = document.getElementById("email");
+        username.textContent = data.data.name;
+        name.value = data.data.name;
+        email.value = data.data.email;
+      }
+    } else {
+      signBtn.addEventListener("click", showSignWindow);
+      bookingBtn.addEventListener("click", showSignWindow);
+      if (window.location.pathname === "/booking") {
+        window.location.href = "/";
+      }
+    }
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 
 function logout() {
   fetch("/api/user/auth", {
@@ -21,33 +53,20 @@ function logout() {
     .catch((err) => console.log(err));
 }
 
-function showSignWindow() {
+export function redirectBooking() {
+  window.location.href = "/booking";
+}
+
+export function showSignWindow() {
   signin.className += " sign-container__active";
   signBackground.className += " sign-background__active";
 }
 
-fetch("/api/user/auth", {
-  method: "GET",
-})
-  .then((res) => res.json())
-  .then((data) => {
-    if (data.data != null) {
-      signBtn.textContent = "登出系統";
-      signBtn.addEventListener("click", logout);
-    } else {
-      signBtn.addEventListener("click", showSignWindow);
-    }
-  })
-  .catch((err) => {
-    console.log(err);
-  });
-
-function clearHint() {
-  signupHintContainer.style.display = "none";
-  signupHint.textContent = "";
-  signinHintContainer.style.display = "none";
-  signinHint.textContent = "";
-}
+registered.addEventListener("click", showSigninWindow);
+unregistered.addEventListener("click", showSignupWindow);
+closeIcons.forEach((closeIcon) => {
+  closeIcon.addEventListener("click", closeSignWindow);
+});
 
 function showSigninWindow() {
   signup.className = signup.className.replace(" sign-container__active", "");
@@ -71,11 +90,15 @@ function closeSignWindow() {
   clearHint();
 }
 
-registered.addEventListener("click", showSigninWindow);
-unregistered.addEventListener("click", showSignupWindow);
-closeIcons.forEach((closeIcon) => {
-  closeIcon.addEventListener("click", closeSignWindow);
-});
+function clearHint() {
+  signupHintContainer.style.display = "none";
+  signupHint.textContent = "";
+  signinHintContainer.style.display = "none";
+  signinHint.textContent = "";
+}
+
+signupForm.addEventListener("submit", handleSignupSubmit);
+signinForm.addEventListener("submit", handleSigninSubmit);
 
 function handleSigninSubmit(e) {
   e.preventDefault();
@@ -88,9 +111,7 @@ function handleSigninSubmit(e) {
     },
     body: JSON.stringify(infoValue),
   })
-    .then((res) => {
-      return res.json();
-    })
+    .then((res) => res.json())
     .then((data) => {
       if (data.ok) {
         signinHintContainer.style.display = "flex";
@@ -137,8 +158,3 @@ function handleSignupSubmit(e) {
       console.log(err);
     });
 }
-
-const signupForm = document.getElementById("signupForm");
-signupForm.addEventListener("submit", handleSignupSubmit);
-const signinForm = document.getElementById("signinForm");
-signinForm.addEventListener("submit", handleSigninSubmit);

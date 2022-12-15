@@ -3,7 +3,7 @@ body {
 }
 .welcome {
   margin-top: 54px;
-  background-image: url("/static/img/welcome.png");
+  background-image: url("/img/welcome.png");
   background-position: left top;
   height: 320px;
   display: flex;

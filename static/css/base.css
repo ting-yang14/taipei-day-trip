@@ -199,8 +199,8 @@ form input:last-child {
 footer {
   background-color: var(--secondary-color-gray-50);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   height: 104px;
 }
 footer > p {

@@ -1,14 +1,16 @@
 from flask import *
 from api.category import category
 from api.attraction import attraction
-from api.userauth import userauth
+from api.user import user
+from api.booking import booking
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path = '/', static_folder = 'static')
 app.config["JSON_AS_ASCII"] = False
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.register_blueprint(category, url_prefix="/api")
 app.register_blueprint(attraction, url_prefix="/api")
-app.register_blueprint(userauth, url_prefix="/api")
+app.register_blueprint(user, url_prefix="/api")
+app.register_blueprint(booking, url_prefix="/api")
 
 @app.route("/")
 def index():

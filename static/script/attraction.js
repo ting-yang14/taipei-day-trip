@@ -121,7 +121,7 @@ function handleStartBooking() {
 }
 
 function bookTrip() {
-  if (checkOrderInfo()) {
+  if (checkTripInfo()) {
     let bookingInfo = {
       attractionId: attractionId,
       date: date.value,
@@ -152,7 +152,7 @@ function bookTrip() {
 
 date.min = new Date().toISOString().slice(0, 10);
 
-function checkOrderInfo() {
+function checkTripInfo() {
   let date = document.getElementById("date").value;
   let time = document.querySelector('input[name="time"]:checked');
   if (date === "") {

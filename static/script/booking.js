@@ -11,6 +11,8 @@ const noBookingContext = document.querySelector(".noBooking_context");
 const footer = document.querySelector("footer");
 const body = document.querySelector("body");
 const main = document.querySelector("main");
+const orderBtn = document.querySelector(".orderBtn");
+let order = {};
 
 fetch("/api/booking", { method: "get" })
   .then((res) => res.json())
@@ -23,6 +25,10 @@ fetch("/api/booking", { method: "get" })
       time.textContent = translateTime(data.data.time);
       price.textContent = `新台幣 ${data.data.price.toString()}元`;
       totalPrice.textContent = `新台幣 ${data.data.price.toString()}元`;
+      order.trip = data.data;
+      order.price = order.trip.price;
+      delete order.trip.price;
+      console.log(order);
       bookingContexts.forEach((context) => {
         context.style.display = "block";
       });
@@ -35,7 +41,143 @@ fetch("/api/booking", { method: "get" })
   .catch((err) => {
     console.log(err);
   });
+TPDirect.setupSDK(
+  126906,
+  "app_Bd7Dq6UOmo6IE1RjeNrEQJR0Epjx6BPWdXL8WeWvXFfOWuQ9PntrdgFoEvAv",
+  "sandbox"
+);
+// Display ccv field
+let fields = {
+  number: {
+    // css selector
+    element: "#card-number",
+    placeholder: "**** **** **** ****",
+  },
+  expirationDate: {
+    // DOM object
+    element: document.getElementById("card-expiration-date"),
+    placeholder: "MM / YY",
+  },
+  ccv: {
+    element: "#card-ccv",
+    placeholder: "ccv",
+  },
+};
+TPDirect.card.setup({
+  fields: fields,
+  styles: {
+    // Style all elements
+    input: {
+      color: "var(--additional-color-black)",
+    },
+    // Styling ccv field
+    "input.ccv": {
+      "font-size": "16px",
+    },
+    // Styling expiration-date field
+    "input.expiration-date": {
+      "font-size": "16px",
+    },
+    // Styling card-number field
+    "input.card-number": {
+      "font-size": "16px",
+    },
+    // style focus state
+    ":focus": {
+      // 'color': 'black'
+    },
+    // style valid state
+    ".valid": {
+      color: "green",
+    },
+    // style invalid state
+    ".invalid": {
+      color: "red",
+    },
+    // Media queries
+    // Note that these apply to the iframe, not the root window.
+    "@media screen and (max-width: 400px)": {
+      input: {
+        color: "orange",
+      },
+    },
+  },
+  // 此設定會顯示卡號輸入正確後，會顯示前六後四碼信用卡卡號
+  isMaskCreditCardNumber: true,
+  maskCreditCardNumberRange: {
+    beginIndex: 6,
+    endIndex: 11,
+  },
+});
+function postOrder() {
+  const tappayStatus = TPDirect.card.getTappayFieldsStatus();
 
+  // 確認是否可以 getPrime
+  if (tappayStatus.canGetPrime === false) {
+    alert("付款資訊輸入不正確");
+    return;
+  }
+  if (checkOrderInfo() === false) {
+    return;
+  } else {
+    order.contact = generateContactInfo();
+  }
+  // Get prime
+  TPDirect.card.getPrime((result) => {
+    if (result.status !== 0) {
+      alert("get prime error " + result.msg);
+      return;
+    }
+    alert("get prime 成功，prime: " + result.card.prime);
+    orderRequest = {
+      prime: result.card.prime,
+      order: order,
+    };
+    console.log(orderRequest);
+    fetch("/api/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(orderRequest),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data.data);
+        if (data.data) {
+          window.location.href = `/thankyou?number=${data.data.number}`;
+        }
+      })
+      .catch((err) => console.log(err));
+  });
+}
+
+function checkOrderInfo() {
+  let name = document.getElementById("name").value;
+  let email = document.getElementById("email").value;
+  let phone = document.getElementById("phone").value;
+  if (name === "") {
+    alert("請填入聯絡姓名");
+    return false;
+  }
+  if (email === "") {
+    alert("請填入聯絡信箱");
+    return false;
+  }
+  if (phone === "") {
+    alert("請填入手機號碼");
+    return false;
+  }
+  return true;
+}
+function generateContactInfo() {
+  let contact = {};
+  contact.name = document.getElementById("name").value;
+  contact.email = document.getElementById("email").value;
+  contact.phone = document.getElementById("phone").value;
+  return contact;
+}
+orderBtn.addEventListener("click", postOrder);
 function translateTime(time) {
   if (time === "morning") {
     return "早上9點到下午4點";

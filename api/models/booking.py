@@ -28,7 +28,8 @@ class Booking:
             FROM attraction 
             INNER JOIN img on img.attraction_id = attraction.id
             INNER JOIN booking on attraction.id = booking.attraction_id
-            WHERE booking.member_id = %s
+            WHERE booking.member_id = %s 
+            AND booking.payment_status = 1
             LIMIT 1;
         """
         result =  mysql_pool.execute(get_booked_info_query, (user_id,))
@@ -41,8 +42,8 @@ class Booking:
     def book_trip(self, user_id, request):
         book_trip_query="""
             REPLACE INTO booking 
-            (member_id, attraction_id, date, time, price) 
-            VALUES (%s, %s, %s, %s, %s)
+            (member_id, attraction_id, date, time, price, payment_status) 
+            VALUES (%s, %s, %s, %s, %s, 1)
         """
         mysql_pool.execute(book_trip_query, (user_id, request["attractionId"], request["date"], request["time"], request["price"],), True)
         print("User " + str(user_id) + ": Booking Succeed!")

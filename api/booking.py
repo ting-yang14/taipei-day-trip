@@ -52,7 +52,7 @@ def delete():
     if access_token:
         try: 
             user_id = model_user.check_auth(access_token)  
-            model_booking.delete_trip(user_id)
+            model_booking.delete_trip_from_booking(user_id)
             response = make_response({"ok": True}, 200, headers)
             return response
         except Exception as e:

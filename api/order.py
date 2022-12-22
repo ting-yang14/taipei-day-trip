@@ -18,23 +18,24 @@ def post():
             user_id = model_user.check_auth(access_token)
             order_response = model_order.order_trip(user_id, order_request)
             response = make_response(order_response, 200, headers)
+            model_booking.delete_trip_from_booking(user_id)
             return response
         except Exception as e:
             print(e)
-            response = make_response({"error": True,"message": "伺服器內部錯誤"}, 500, headers)
+            response = make_response({"error": True, "message": "伺服器內部錯誤"}, 500, headers)
             return response
     else:
         response = make_response({"error": True, "message": "未登入系統，拒絕存取"}, 403, headers)
         return response
 
 @order.route("/order/<string:orderNumber>", methods = ["GET"])
-def get_order(orderNumber):
+def get(orderNumber):
     access_token = request.cookies.get("access_token")
     if access_token:
         try:
             user_id = model_user.check_auth(access_token)
-            booked_info = model_booking.get_booked_info(user_id)
-            response = make_response(booked_info, 200, headers)
+            order_info = model_order.get_order_info(user_id, orderNumber)
+            response = make_response(order_info, 200, headers)
             return response
         except Exception as e:
             print(e)

@@ -28,7 +28,6 @@ fetch("/api/booking", { method: "get" })
       order.trip = data.data;
       order.price = order.trip.price;
       delete order.trip.price;
-      console.log(order);
       bookingContexts.forEach((context) => {
         context.style.display = "block";
       });
@@ -41,20 +40,19 @@ fetch("/api/booking", { method: "get" })
   .catch((err) => {
     console.log(err);
   });
+
 TPDirect.setupSDK(
   126906,
   "app_Bd7Dq6UOmo6IE1RjeNrEQJR0Epjx6BPWdXL8WeWvXFfOWuQ9PntrdgFoEvAv",
   "sandbox"
 );
-// Display ccv field
+
 let fields = {
   number: {
-    // css selector
     element: "#card-number",
     placeholder: "**** **** **** ****",
   },
   expirationDate: {
-    // DOM object
     element: document.getElementById("card-expiration-date"),
     placeholder: "MM / YY",
   },
@@ -63,39 +61,31 @@ let fields = {
     placeholder: "ccv",
   },
 };
+
 TPDirect.card.setup({
   fields: fields,
   styles: {
-    // Style all elements
     input: {
       color: "var(--additional-color-black)",
     },
-    // Styling ccv field
     "input.ccv": {
       "font-size": "16px",
     },
-    // Styling expiration-date field
     "input.expiration-date": {
       "font-size": "16px",
     },
-    // Styling card-number field
     "input.card-number": {
       "font-size": "16px",
     },
-    // style focus state
     ":focus": {
-      // 'color': 'black'
+      color: "black",
     },
-    // style valid state
     ".valid": {
       color: "green",
     },
-    // style invalid state
     ".invalid": {
       color: "red",
     },
-    // Media queries
-    // Note that these apply to the iframe, not the root window.
     "@media screen and (max-width: 400px)": {
       input: {
         color: "orange",
@@ -111,8 +101,6 @@ TPDirect.card.setup({
 });
 function postOrder() {
   const tappayStatus = TPDirect.card.getTappayFieldsStatus();
-
-  // 確認是否可以 getPrime
   if (tappayStatus.canGetPrime === false) {
     alert("付款資訊輸入不正確");
     return;
@@ -122,18 +110,15 @@ function postOrder() {
   } else {
     order.contact = generateContactInfo();
   }
-  // Get prime
   TPDirect.card.getPrime((result) => {
     if (result.status !== 0) {
       alert("get prime error " + result.msg);
       return;
     }
-    alert("get prime 成功，prime: " + result.card.prime);
     orderRequest = {
       prime: result.card.prime,
       order: order,
     };
-    console.log(orderRequest);
     fetch("/api/orders", {
       method: "POST",
       headers: {
@@ -143,7 +128,6 @@ function postOrder() {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log(data.data);
         if (data.data) {
           window.location.href = `/thankyou?number=${data.data.number}`;
         }
@@ -170,6 +154,7 @@ function checkOrderInfo() {
   }
   return true;
 }
+
 function generateContactInfo() {
   let contact = {};
   contact.name = document.getElementById("name").value;
@@ -177,7 +162,9 @@ function generateContactInfo() {
   contact.phone = document.getElementById("phone").value;
   return contact;
 }
+
 orderBtn.addEventListener("click", postOrder);
+
 function translateTime(time) {
   if (time === "morning") {
     return "早上9點到下午4點";

@@ -33,7 +33,10 @@ fetch("/api/user/auth", {
     } else {
       signBtn.addEventListener("click", showSignWindow);
       bookingBtn.addEventListener("click", showSignWindow);
-      if (window.location.pathname === "/booking") {
+      if (
+        window.location.pathname === "/booking" ||
+        window.location.pathname === "/thankyou"
+      ) {
         window.location.href = "/";
       }
     }

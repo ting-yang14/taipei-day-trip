@@ -67,6 +67,7 @@ TPDirect.card.setup({
   styles: {
     input: {
       color: "var(--additional-color-black)",
+      "font-family": '"Noto Sans TC", sans-serif',
     },
     "input.ccv": {
       "font-size": "16px",

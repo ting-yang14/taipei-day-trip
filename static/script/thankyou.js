@@ -4,8 +4,8 @@ const Number = url.searchParams.get("number");
 const orderStatus = document.getElementById("orderStatus");
 const orderNumber = document.getElementById("orderNumber");
 const orderMsg = document.getElementById("orderMsg");
-const cardFront = document.querySelector(".card-front");
-const cardBack = document.querySelector(".card-back");
+const cardFront = document.querySelector(".flip-card-front");
+const cardBack = document.querySelector(".flip-card-back");
 
 fetch(`/api/order/${Number}`)
   .then((res) => res.json())

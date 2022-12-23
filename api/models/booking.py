@@ -29,7 +29,7 @@ class Booking:
             FROM attraction 
             INNER JOIN img on img.attraction_id = attraction.id
             INNER JOIN booking on attraction.id = booking.attraction_id
-            WHERE booking.member_id = %s 
+            WHERE booking.user_id = %s 
             LIMIT 1;
         """
         val = (user_id,)
@@ -43,7 +43,7 @@ class Booking:
     def book_trip(self, user_id, request):
         book_trip_query="""
             REPLACE INTO booking 
-            (member_id, 
+            (user_id, 
             attraction_id, 
             date, 
             time, 
@@ -63,7 +63,7 @@ class Booking:
     def delete_trip_from_booking(self, user_id):
         delete_trip_from_booking_query="""
             DELETE FROM booking 
-            WHERE member_id = %s
+            WHERE user_id = %s
         """
         val = (user_id,)
         mysql_pool.execute(delete_trip_from_booking_query, val, True)

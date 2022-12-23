@@ -19,7 +19,7 @@ class Order:
     def create_order(self, user_id, order_number, request):
         create_order_query = """
             INSERT INTO cart
-            (member_id, 
+            (user_id, 
             order_number, 
             attraction_id, 
             date, 
@@ -76,7 +76,7 @@ class Order:
     def insert_payment_response(self, user_id, order_number, payment_response):
         insert_payment_response_query = """
             INSERT INTO payment
-            (member_id, order_number, payment_status, msg) 
+            (user_id, order_number, payment_status, msg) 
             VALUES
             (%s, %s, %s, %s)
         """
@@ -92,7 +92,7 @@ class Order:
             update_cart_payment_status_query = """
                 UPDATE cart 
                 SET payment_status = 0 
-                WHERE member_id = %s
+                WHERE user_id = %s
                 AND order_number = %s
             """
             val = (user_id, order_number)
@@ -137,7 +137,7 @@ class Order:
             FROM attraction
             INNER JOIN img on img.attraction_id = attraction.id
             INNER JOIN cart on cart.attraction_id = attraction.id
-            WHERE cart.member_id = %s
+            WHERE cart.user_id = %s
             AND cart.order_number = %s
             LIMIT 1;
         """

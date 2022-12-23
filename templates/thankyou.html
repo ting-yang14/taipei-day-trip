@@ -1,0 +1,26 @@
+{% extends "base.html"%} {% block head %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='/css/thankyou.css')}}"
+/>{% endblock %}{% block title %}訂購完成 - 台北一日遊{% endblock %} {% block
+content %}
+<main>
+  <div class="container">
+    <div class="flip-card animation">
+      <div class="flip-card-inner">
+        <div class="flip-card-front card-front"></div>
+        <div class="flip-card-back card-back"></div>
+      </div>
+    </div>
+    <div class="msg-container">
+      <p class="bold" id="orderStatus"></p>
+      <p class="bold">您的訂單編號如下</p>
+      <p class="reg" id="orderNumber"></p>
+      <p class="reg">請記住此編號或到會員中心查詢歷史訂單</p>
+      <p class="reg" id="orderMsg"></p>
+    </div>
+  </div>
+</main>
+{% endblock %} {% block script %}
+<script src="{{url_for('static', filename='/script/thankyou.js')}}"></script>
+{% endblock %}

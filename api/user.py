@@ -10,7 +10,7 @@ headers = {"Content-Type": "application/json"}
 def post():
     signup_request = request.get_json()
     try:
-        check_result = model_user.check_email_repeat(signup_request["email"])
+        check_result = model_user.check_email_repeat(signup_request)
         if check_result:
             response = make_response({"error": True, "message": "email已被註冊"}, 400, headers)
         else:

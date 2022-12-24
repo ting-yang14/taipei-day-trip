@@ -39,7 +39,7 @@ class MySQLPool:
 
     def execute(self, query, val = None, commit = False):
         conn = self.pool.get_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary = True)
         if val:
             cursor.execute(query, val)
         else:

@@ -11,13 +11,16 @@ class User:
     def __init__(self):
         pass
 
-    def check_email_repeat(self, email):
+    def check_email_repeat(self, request):
         check_email_query = """
             SELECT EXISTS (SELECT * 
                            FROM user 
                            WHERE email = %s)
         """
-        repeat_email_num =  mysql_pool.execute(check_email_query, (email,))[0][0]
+        val = (request["email"],)
+        result =  mysql_pool.execute(check_email_query, val)[0]
+        keys = list(result.keys())
+        repeat_email_num = result[keys[0]]
         if repeat_email_num:
             return True
         else:
@@ -30,11 +33,9 @@ class User:
             VALUES (%s, %s, %s);
         """
         hashed_password = bcrypt.generate_password_hash(request["password"]).decode('utf8')
-        print(hashed_password)
-        mysql_pool.execute(signup_query, (request["name"], request["email"], hashed_password,), True)
-        result = True
-        print("signup result:", result)
-        return result
+        val = (request["name"], request["email"], hashed_password,)
+        mysql_pool.execute(signup_query, val, True)
+        return True
     
     def signin(self, request):
         signin_query = """
@@ -42,9 +43,10 @@ class User:
             FROM user 
             WHERE email = %s
         """
-        user_info = mysql_pool.execute(signin_query, (request["email"],))[0]
-        user_id = user_info[0]
-        user_password = user_info[1]
+        val = (request["email"],)
+        user_info = mysql_pool.execute(signin_query, val)[0]
+        user_id = user_info["id"]
+        user_password = user_info["password"]
         check_result = bcrypt.check_password_hash(user_password, request["password"])
         if check_result:
             return user_id
@@ -57,8 +59,8 @@ class User:
             FROM user 
             WHERE id = %s
         """ 
-        result = mysql_pool.execute(get_user_info_query, (user_id,))[0]
-        user_info = {"id": result[0], "name": result[1], "email": result[2]}
+        val = (user_id,)
+        user_info = mysql_pool.execute(get_user_info_query, val)[0]
         return user_info
 
     def set_auth(self, user_id):

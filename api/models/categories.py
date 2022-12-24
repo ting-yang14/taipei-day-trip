@@ -1,5 +1,4 @@
 from ..database import database
-from itertools import chain
 mysql_pool = database.MySQLPool(**database.dbconfig)
 
 class Categories:
@@ -7,10 +6,12 @@ class Categories:
         pass
     
     def get_categories(self):
+        categories = []
         get_categories_query = """
             SELECT DISTINCT category 
             FROM attraction
         """
         result = mysql_pool.execute(get_categories_query)
-        category_list = list(chain.from_iterable(result))
-        return category_list
+        for item in result:
+            categories.append(item["category"])
+        return categories

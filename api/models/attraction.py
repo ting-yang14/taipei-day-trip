@@ -1,10 +1,12 @@
 from ..database import database
+
 mysql_pool = database.MySQLPool(**database.dbconfig)
+
 
 class Attraction:
     def __init__(self):
         pass
-    
+
     def images_string_to_list(self, attractions):
         for item in attractions:
             item["images"] = item.pop("GROUP_CONCAT(img.url SEPARATOR ',')").split(",")
@@ -21,7 +23,11 @@ class Attraction:
                 GROUP BY attraction.id 
                 LIMIT %s, 13
             """
-        val = (keyword, '%' + keyword + '%', page*12,)
+        val = (
+            keyword,
+            "%" + keyword + "%",
+            page * 12,
+        )
         attractions = mysql_pool.execute(get_attraction_by_keyword_query, val)
         self.images_string_to_list(attractions)
         if len(attractions) == 13:

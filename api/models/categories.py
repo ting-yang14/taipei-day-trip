@@ -1,10 +1,12 @@
 from ..database import database
+
 mysql_pool = database.MySQLPool(**database.dbconfig)
+
 
 class Categories:
     def __init__(self):
         pass
-    
+
     def get_categories(self):
         categories = []
         get_categories_query = """

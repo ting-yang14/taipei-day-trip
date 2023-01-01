@@ -1,6 +1,14 @@
 {% extends "base.html" %}{% block head %}
 
-<script src="https://js.tappaysdk.com/sdk/tpdirect/v5.14.0"></script>
+<script
+  type="text/javascript"
+  src="https://js.tappaysdk.com/sdk/tpdirect/v5.14.0"
+  defer
+></script>
+<script
+  type="module"
+  src="{{url_for('static', filename='/script/setting.js')}}"
+></script>
 <link
   rel="stylesheet"
   href="{{ url_for('static', filename='/css/booking.css')}}"
@@ -60,15 +68,28 @@
       <div class="contact_container">
         <div class="text">
           <p class="reg">聯絡姓名：</p>
-          <input type="text" id="name" />
+          <input type="text" id="name" required />
         </div>
         <div class="text">
           <p class="reg">聯絡信箱：</p>
-          <input type="email" id="email" />
+          <input
+            type="email"
+            id="email"
+            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+            size="30"
+            required
+          />
         </div>
         <div class="text">
           <p class="reg">手機號碼：</p>
-          <input type="tel" id="phone" />
+          <input
+            type="tel"
+            id="phone"
+            placeholder="0912345678"
+            pattern="[0-9]{10}"
+            size="10"
+            required
+          />
         </div>
         <div class="text">
           <p class="content">
@@ -106,5 +127,8 @@
   </div>
 </main>
 {% endblock %} {% block script %}
-<script src="{{url_for('static', filename='/script/booking.js')}}"></script>
+<script
+  type="module"
+  src="{{url_for('static', filename='/script/booking.js')}}"
+></script>
 {% endblock %}

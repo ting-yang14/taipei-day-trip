@@ -1,3 +1,5 @@
+import { checkName, checkEmail, checkPhone } from "./validate.js";
+import { APP_ID, APP_KEY } from "./setting.js";
 const attractionName = document.getElementById("attractionName");
 const date = document.getElementById("date");
 const time = document.getElementById("time");
@@ -8,44 +10,51 @@ const deleteBtn = document.getElementById("delete");
 const attractionImg = document.getElementById("attractionImg");
 const bookingContexts = document.querySelectorAll(".booking_context");
 const noBookingContext = document.querySelector(".noBooking_context");
-const footer = document.querySelector("footer");
 const body = document.querySelector("body");
 const main = document.querySelector("main");
 const orderBtn = document.querySelector(".orderBtn");
-let order = {};
+let orderData = {};
 
-fetch("/api/booking", { method: "get" })
-  .then((res) => res.json())
-  .then((data) => {
+booking_init();
+async function booking_init() {
+  try {
+    const res = await fetch("/api/booking", { method: "get" });
+    const data = await res.json();
     if (data.data) {
-      attractionName.textContent = data.data.attraction.name;
-      address.textContent = data.data.attraction.address;
-      attractionImg.src = data.data.attraction.image;
-      date.textContent = data.data.date;
-      time.textContent = translateTime(data.data.time);
-      price.textContent = `新台幣 ${data.data.price.toString()}元`;
-      totalPrice.textContent = `新台幣 ${data.data.price.toString()}元`;
-      order.trip = data.data;
-      order.price = order.trip.price;
-      delete order.trip.price;
-      bookingContexts.forEach((context) => {
-        context.style.display = "block";
-      });
+      showBookingContent(data);
+      getOrderData(data);
     } else {
-      noBookingContext.style.display = "block";
-      body.style.backgroundColor = "var(--secondary-color-gray-50)";
-      main.style.backgroundColor = "var(--additional-color-white)";
+      showNoBookingContent();
     }
-  })
-  .catch((err) => {
+  } catch (err) {
     console.log(err);
-  });
+  }
+}
 
-TPDirect.setupSDK(
-  126906,
-  "app_Bd7Dq6UOmo6IE1RjeNrEQJR0Epjx6BPWdXL8WeWvXFfOWuQ9PntrdgFoEvAv",
-  "sandbox"
-);
+function getOrderData(data) {
+  orderData.trip = data.data;
+  orderData.price = orderData.trip.price;
+  delete orderData.trip.price;
+}
+
+function showBookingContent(data) {
+  attractionName.textContent = data.data.attraction.name;
+  address.textContent = data.data.attraction.address;
+  attractionImg.src = data.data.attraction.image;
+  date.textContent = data.data.date;
+  time.textContent = translateTime(data.data.time);
+  price.textContent = `新台幣 ${data.data.price.toString()}元`;
+  totalPrice.textContent = `新台幣 ${data.data.price.toString()}元`;
+  bookingContexts.forEach((context) => {
+    context.style.display = "block";
+  });
+}
+
+function showNoBookingContent() {
+  noBookingContext.style.display = "block";
+  body.style.backgroundColor = "var(--secondary-color-gray-50)";
+  main.style.backgroundColor = "var(--additional-color-white)";
+}
 
 let fields = {
   number: {
@@ -61,6 +70,8 @@ let fields = {
     placeholder: "ccv",
   },
 };
+
+TPDirect.setupSDK(APP_ID, APP_KEY, "sandbox");
 
 TPDirect.card.setup({
   fields: fields,
@@ -100,6 +111,7 @@ TPDirect.card.setup({
     endIndex: 11,
   },
 });
+
 function postOrder() {
   const tappayStatus = TPDirect.card.getTappayFieldsStatus();
   if (tappayStatus.canGetPrime === false) {
@@ -109,31 +121,35 @@ function postOrder() {
   if (checkOrderInfo() === false) {
     return;
   } else {
-    order.contact = generateContactInfo();
+    orderData.contact = generateContactInfo();
   }
   TPDirect.card.getPrime((result) => {
     if (result.status !== 0) {
       alert("get prime error " + result.msg);
       return;
     }
-    orderRequest = {
+    let orderRequest = {
       prime: result.card.prime,
-      order: order,
+      order: orderData,
     };
-    fetch("/api/orders", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(orderRequest),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.data) {
-          window.location.href = `/thankyou?number=${data.data.number}`;
+    (async () => {
+      try {
+        const res = await fetch("/api/orders", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(orderRequest),
+        });
+        const data = await res.json();
+        if (data.error) {
+          alert(data.message);
         }
-      })
-      .catch((err) => console.log(err));
+        window.location.href = `/thankyou?number=${data.data.number}`;
+      } catch (err) {
+        console.log(err);
+      }
+    })();
   });
 }
 
@@ -141,16 +157,16 @@ function checkOrderInfo() {
   let name = document.getElementById("name").value;
   let email = document.getElementById("email").value;
   let phone = document.getElementById("phone").value;
-  if (name === "") {
-    alert("請填入聯絡姓名");
+  if (!checkName(name)) {
+    alert("姓名格式錯誤，請輸入至多10位中英文字母不含空格");
     return false;
   }
-  if (email === "") {
-    alert("請填入聯絡信箱");
+  if (!checkEmail(email)) {
+    alert("信箱格式錯誤，請填入正確的信箱格式");
     return false;
   }
-  if (phone === "") {
-    alert("請填入手機號碼");
+  if (!checkPhone(phone)) {
+    alert("手機格式錯誤，請輸入09xxxxxxxx");
     return false;
   }
   return true;
@@ -176,14 +192,16 @@ function translateTime(time) {
 
 deleteBtn.addEventListener("click", deleteBooking);
 
-function deleteBooking() {
-  fetch("/api/booking", { method: "DELETE" })
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.ok) {
-        window.location.reload();
-      } else {
-        alert(`${data.message}`);
-      }
-    });
+async function deleteBooking() {
+  try {
+    const res = await fetch("/api/booking", { method: "DELETE" });
+    const data = await res.json();
+    if (data.ok) {
+      window.location.reload();
+    } else {
+      alert(`${data.message}`);
+    }
+  } catch (err) {
+    console.log(err);
+  }
 }

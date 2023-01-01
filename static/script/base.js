@@ -1,3 +1,4 @@
+import { checkName, checkEmail, checkPassword } from "./validate.js";
 const signBtn = document.getElementById("signBtn");
 const signup = document.getElementById("signup");
 const signin = document.getElementById("signin");
@@ -13,22 +14,20 @@ const bookingBtn = document.getElementById("bookingBtn");
 const signupForm = document.getElementById("signupForm");
 const signinForm = document.getElementById("signinForm");
 
-fetch("/api/user/auth", {
-  method: "GET",
-})
-  .then((res) => res.json())
-  .then((data) => {
-    if (data.data) {
+base_init();
+
+async function base_init() {
+  try {
+    const res = await fetch("/api/user/auth", {
+      method: "GET",
+    });
+    const data = await res.json();
+    if (data.data !== null) {
       signBtn.textContent = "登出系統";
       signBtn.addEventListener("click", logout);
       bookingBtn.addEventListener("click", redirectBooking);
       if (window.location.pathname === "/booking") {
-        const username = document.getElementById("username");
-        const name = document.getElementById("name");
-        const email = document.getElementById("email");
-        username.textContent = data.data.name;
-        name.value = data.data.name;
-        email.value = data.data.email;
+        setBookingInfo(data);
       }
     } else {
       signBtn.addEventListener("click", showSignWindow);
@@ -40,20 +39,29 @@ fetch("/api/user/auth", {
         window.location.href = "/";
       }
     }
-  })
-  .catch((err) => {
+  } catch (err) {
     console.log(err);
-  });
+  }
+}
 
-function logout() {
-  fetch("/api/user/auth", {
-    method: "DELETE",
-  })
-    .then((res) => res.json())
-    .then(() => {
-      window.location.reload();
-    })
-    .catch((err) => console.log(err));
+function setBookingInfo(data) {
+  const username = document.getElementById("username");
+  const name = document.getElementById("name");
+  const email = document.getElementById("email");
+  username.textContent = data.data.name;
+  name.value = data.data.name;
+  email.value = data.data.email;
+}
+
+async function logout() {
+  try {
+    await fetch("/api/user/auth", {
+      method: "DELETE",
+    });
+    window.location.reload();
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 export function redirectBooking() {
@@ -103,61 +111,88 @@ function clearHint() {
 signupForm.addEventListener("submit", handleSignupSubmit);
 signinForm.addEventListener("submit", handleSigninSubmit);
 
+function showSigninHint(msg, color) {
+  signinHintContainer.style.display = "flex";
+  signinHint.textContent = msg;
+  signinHint.style.color = color;
+}
+function showSignupHint(msg, color) {
+  signupHintContainer.style.display = "flex";
+  signupHint.textContent = msg;
+  signupHint.style.color = color;
+}
+
 function handleSigninSubmit(e) {
   e.preventDefault();
-  const userInfo = new FormData(e.target);
-  const infoValue = Object.fromEntries(userInfo.entries());
-  fetch("/api/user/auth", {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(infoValue),
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.ok) {
-        signinHintContainer.style.display = "flex";
-        signinHint.textContent = "成功登入";
-        signinHint.style.color = "green";
-        window.location.reload();
-      } else {
-        signinHintContainer.style.display = "flex";
-        signinHint.textContent = "email或密碼錯誤";
-        signinHint.style.color = "red";
+  const signinInput = new FormData(e.target);
+  const inputValue = Object.fromEntries(signinInput.entries());
+  if (!checkEmail(inputValue.email)) {
+    showSigninHint("email格式錯誤", "red");
+  }
+  if (!checkPassword(inputValue.password)) {
+    showSigninHint("密碼格式錯誤，請輸入8位以上字母、數字或符號", "red");
+  }
+  if (checkEmail(inputValue.email) && checkPassword(inputValue.password)) {
+    (async () => {
+      try {
+        const res = await fetch("/api/user/auth", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(inputValue),
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showSigninHint("成功登入", "green");
+          window.location.reload();
+        } else {
+          showSigninHint("email或密碼錯誤", "red");
+        }
+      } catch (err) {
+        console.log(err);
       }
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+    })();
+  }
 }
 
 function handleSignupSubmit(e) {
   e.preventDefault();
-  const userInfo = new FormData(e.target);
-  const infoValue = Object.fromEntries(userInfo.entries());
-  fetch("/api/user", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(infoValue),
-  })
-    .then((res) => {
-      return res.json();
-    })
-    .then((data) => {
-      if (data.ok) {
-        signupHintContainer.style.display = "flex";
-        signupHint.textContent = "成功註冊";
-        signupHint.style.color = "green";
-      } else {
-        signupHintContainer.style.display = "flex";
-        signupHint.textContent = "email已被註冊";
-        signupHint.style.color = "red";
+  const signupInput = new FormData(e.target);
+  const inputValue = Object.fromEntries(signupInput.entries());
+
+  if (!checkName(inputValue.name)) {
+    showSignupHint("姓名格式錯誤，請輸入至多10位中英文字母不含空格", "red");
+  }
+  if (!checkEmail(inputValue.email)) {
+    showSignupHint("email格式錯誤", "red");
+  }
+  if (!checkPassword(inputValue.password)) {
+    showSignupHint("密碼格式錯誤，請輸入8位以上字母、數字或符號", "red");
+  }
+  if (
+    checkName(inputValue.name) &&
+    checkEmail(inputValue.email) &&
+    checkPassword(inputValue.password)
+  ) {
+    (async () => {
+      try {
+        const res = await fetch("/api/user", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(inputValue),
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showSignupHint("成功註冊", "green");
+        } else {
+          showSignupHint(data.message, "red");
+        }
+      } catch (err) {
+        console.log(err);
       }
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+    })();
+  }
 }

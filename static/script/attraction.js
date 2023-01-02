@@ -1,5 +1,5 @@
+// import { checkDate, checkTime } from "./validate.js";
 import { showSignWindow, redirectBooking } from "./base.js";
-
 const gallery = document.querySelector(".gallery");
 const picCurrent = document.querySelector(".pic-current");
 const attractionName = document.getElementById("name");
@@ -17,30 +17,33 @@ const date = document.getElementById("date");
 let imageIndex = 0;
 let attractionId = -1;
 
-fetch(`/api${window.location.pathname}`)
-  .then((response) => response.json())
-  .then((data) => {
-    if (data.data) {
-      attractionId = data.data.id;
-      document.querySelector("title").textContent = data.data.name;
-      loadImage(data.data.images);
-      createCurrentImageDot(data.data.images);
-      attractionName.textContent = data.data.name;
-      category.textContent = data.data.category;
-      mrt.textContent = data.data.mrt;
-      description.textContent = data.data.description;
-      address.textContent = data.data.address;
-      transport.textContent = data.data.transport;
-      showImage(imageIndex);
-      next.addEventListener("click", addImageIndex.bind(null, 1));
-      prev.addEventListener("click", addImageIndex.bind(null, -1));
-    } else {
-      document.querySelector("title").textContent = data.message;
-    }
-  })
-  .catch((error) => {
-    console.log(error);
-  });
+attraction_init();
+
+async function attraction_init() {
+  try {
+    const res = await fetch(`/api${window.location.pathname}`);
+    const data = await res.json();
+    attractionId = data.data.id;
+    setAttractionInfo(data);
+    loadImage(data.data.images);
+    createCurrentImageDot(data.data.images);
+    showImage(imageIndex);
+    next.addEventListener("click", addImageIndex.bind(null, 1));
+    prev.addEventListener("click", addImageIndex.bind(null, -1));
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+function setAttractionInfo(data) {
+  document.querySelector("title").textContent = data.data.name;
+  attractionName.textContent = data.data.name;
+  category.textContent = data.data.category;
+  mrt.textContent = data.data.mrt;
+  description.textContent = data.data.description;
+  address.textContent = data.data.address;
+  transport.textContent = data.data.transport;
+}
 
 function loadImage(imgURLList) {
   for (let i = 0; i < imgURLList.length; i++) {
@@ -69,12 +72,12 @@ function showImage(n) {
   if (n < 0) {
     imageIndex = images.length - 1;
   }
-  for (let i = 0; i < images.length; i++) {
-    images[i].style.display = "none";
-  }
-  for (let i = 0; i < dots.length; i++) {
-    dots[i].className = dots[i].className.replace(" active", "");
-  }
+  images.forEach((image) => {
+    image.style.display = "none";
+  });
+  dots.forEach((dot) => {
+    dot.className = dot.className.replace(" active", "");
+  });
   images[imageIndex].style.display = "block";
   dots[imageIndex].className += " active";
 }
@@ -103,21 +106,20 @@ document.querySelectorAll('input[name="time"]').forEach((element) => {
 
 startBookingBtn.addEventListener("click", handleStartBooking);
 
-function handleStartBooking() {
-  fetch("/api/user/auth", {
-    method: "GET",
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.data != null) {
-        bookTrip();
-      } else {
-        showSignWindow();
-      }
-    })
-    .catch((err) => {
-      console.log(err);
+async function handleStartBooking() {
+  try {
+    const res = await fetch("/api/user/auth", {
+      method: "GET",
     });
+    const data = await res.json();
+    if (data.data != null) {
+      bookTrip();
+    } else {
+      showSignWindow();
+    }
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 function bookTrip() {
@@ -128,23 +130,24 @@ function bookTrip() {
       time: document.querySelector('input[name="time"]:checked').value,
       price: parseInt(price.textContent.slice(4, 8)),
     };
-    console.log(JSON.stringify(bookingInfo));
-    fetch("/api/booking", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(bookingInfo),
-    })
-      .then((res) => res.json())
-      .then((data) => {
+    console.log(bookingInfo);
+    (async () => {
+      try {
+        const res = await fetch("/api/booking", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(bookingInfo),
+        });
+        const data = await res.json();
         if (data.ok) {
           redirectBooking();
         } else {
           alert("請確認預訂資料是否正確");
         }
-      })
-      .catch((err) => {
+      } catch (err) {
         console.log(err);
-      });
+      }
+    })();
   } else {
     return;
   }
@@ -159,7 +162,7 @@ function checkTripInfo() {
     alert("請選擇行程日期");
     return false;
   }
-  if (time === null) {
+  if (time === "") {
     alert("請選擇行程時間");
     return false;
   }

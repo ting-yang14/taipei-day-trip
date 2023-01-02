@@ -82,12 +82,14 @@ input,
   width: 200px;
   border-radius: 5px;
   border: 1px solid var(--secondary-color-gray-20);
+  font-family: "Noto Sans TC", sans-serif;
   font-size: 16px;
   font-weight: var(--font-weight-medium);
   line-height: 13px;
   color: var(--additional-color-black);
 }
 ::placeholder {
+  font-family: "Noto Sans TC", sans-serif;
   color: var(--secondary-color-gray-50);
   font-size: 16px;
   font-weight: var(--font-weight-medium);

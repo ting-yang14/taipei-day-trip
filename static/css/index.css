@@ -116,6 +116,7 @@ main {
 .attraction-name > p {
   color: var(--additional-color-white);
   padding: 10px;
+  line-height: 18px;
 }
 .attraction-info {
   display: flex;
@@ -127,6 +128,7 @@ main {
   flex: auto;
   padding-left: 10px;
   display: inline-block;
+  line-height: 18px;
 }
 .attraction-info p:last-child {
   flex: none;

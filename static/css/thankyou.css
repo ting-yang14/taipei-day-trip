@@ -26,7 +26,7 @@ body {
   text-align: center;
   transform-style: preserve-3d;
 }
-.animation .flip-card-inner {
+.animation {
   animation-name: flipCard;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
@@ -56,19 +56,10 @@ body {
   height: 100%;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  background-size: cover;
 }
 .flip-card-back {
   transform: rotateY(180deg);
-}
-.card-front,
-.card-back {
-  background-size: cover;
-}
-.card-front {
-  background-image: url("/img/order_success_1.png");
-}
-.card-back {
-  background-image: url("/img/order_success_2.png");
 }
 .msg-container {
   flex: none;
@@ -97,7 +88,6 @@ body {
   .flip-card {
     position: absolute;
     top: 40px;
-
     transform: translateX(-130px);
     width: 60px;
     height: 60px;

@@ -11,14 +11,13 @@
 | card number | 4242 4242 4242 4242 |
 | card expiration date | 01 / 24 |
 | card ccv | 123 |
+<br/>
 
-<br/>
-<br/>
-<img src = "./image/homepage.png" width="500"/>
-<br/>
-<img src = "./image/attraction_desktop.png" width="500"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src = "./image/attraction_mobile.png" width="160"/>
-<br/>
-<br/>
+<p>
+<img src = "./image/homepage.png" width="40%"/>
+<img src = "./image/attraction_desktop.png" width="40%"/>
+<img src = "./image/attraction_mobile.png" width="13%"/>
+</p>
 
 ## Table Content
 

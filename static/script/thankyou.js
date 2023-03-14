@@ -16,7 +16,7 @@ async function thankyou_init(number) {
     if (data.data) {
       orderNumber.textContent = data.data.number;
       if (data.data.status === 0) {
-        showOrderSuccess();
+        showOrderSuccess(data);
       } else {
         showOrderFail();
       }
@@ -25,7 +25,7 @@ async function thankyou_init(number) {
     console.log(err);
   }
 }
-function showOrderSuccess() {
+function showOrderSuccess(data) {
   orderStatus.textContent = "行程預定成功";
   cardFront.style.backgroundImage = `url("/img/order_success_1.png")`;
   cardBack.style.backgroundImage = `url("/img/order_success_2.png")`;
